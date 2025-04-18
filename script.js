@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DOM Elements --- (Keep all element references)
+    // --- DOM Elements --- (References for ALL features)
     const calendarBody = document.querySelector('.calendar-body');
     const calendarGrid = document.getElementById('calendar-grid');
     const monthYearDisplay = document.getElementById('month-year');
@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingIndicator = document.getElementById('loading-indicator');
     const themeToggle = document.getElementById('theme-toggle');
     const searchInput = document.getElementById('search-input');
-    const suggestionsContainer = document.getElementById('search-suggestions');
-    const seekMonthSelect = document.getElementById('seek-month');
-    const seekYearInput = document.getElementById('seek-year');
-    const seekButton = document.getElementById('seek-button');
+    const suggestionsContainer = document.getElementById('search-suggestions'); // For suggestions
+    const seekMonthSelect = document.getElementById('seek-month');             // For seek
+    const seekYearInput = document.getElementById('seek-year');               // For seek
+    const seekButton = document.getElementById('seek-button');                 // For seek
 
     // --- State & Constants ---
     let currentDate = new Date();
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const FADE_DURATION = 700;
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const SUGGESTION_DEBOUNCE_DELAY = 350;
-    let currentRenderID = 0; // Version counter
+    let currentRenderID = 0; // Version counter for async operations
 
     // --- Utility: Debounce ---
     function debounce(func, delay) {
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
     themeToggle.addEventListener('change', toggleTheme);
 
-    // --- Populate Seek Controls ---
+    // --- Populate Seek Controls --- (Seek Date Feature)
     function populateSeekControls() {
         monthNames.forEach((name, index) => {
             const option = document.createElement('option');
@@ -94,32 +94,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- *** ADDED BACK processGameData FUNCTION *** ---
-    function processGameData(games) {
+    function processGameData(games) { // Groups games by release date
         const gamesByDate = {};
         if (!games || games.length === 0) return gamesByDate;
-
         games.forEach(game => {
-            if (game.released && game.name) { // Ensure game has a release date and name
-                const releaseDate = game.released; // Format: YYYY-MM-DD
-                if (!gamesByDate[releaseDate]) {
-                    gamesByDate[releaseDate] = []; // Initialize array if date not seen before
-                }
-                // Add game to the date's array only if under the limit
+            if (game.released && game.name) {
+                const releaseDate = game.released;
+                if (!gamesByDate[releaseDate]) gamesByDate[releaseDate] = [];
                 if (gamesByDate[releaseDate].length < MAX_GAMES_PER_DAY) {
-                    // Basic duplicate check (by ID) just in case API returns duplicates for a day
-                    if (!gamesByDate[releaseDate].some(existing => existing.id === game.id)) {
-                         gamesByDate[releaseDate].push(game);
+                    if (!gamesByDate[releaseDate].some(g => g.id === game.id)) {
+                        gamesByDate[releaseDate].push(game);
                     }
                 }
             }
         });
-        // The sorting is handled by the API request's 'ordering' parameter.
-        // This function just groups and limits the number per day.
         return gamesByDate;
     }
-    // --- *** END of added function *** ---
-
 
     async function renderCalendar(year, month) {
         const renderID = ++currentRenderID;
@@ -140,19 +130,19 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchError = error;
         }
 
-        if (renderID !== currentRenderID) {
+        if (renderID !== currentRenderID) { // Check if stale
             console.log(`[${renderID}] Discarding stale results (current is ${currentRenderID}).`);
             return;
         }
 
         console.log(`[${renderID}] Processing results...`);
         clearSlideshowIntervals();
-        calendarGrid.innerHTML = ''; // Clear grid now
+        calendarGrid.innerHTML = ''; // Clear grid only if processing latest
 
         try {
-            if (fetchError) throw fetchError; // Handle error if this is latest request
+            if (fetchError) throw fetchError; // Handle error if latest
 
-            const gamesByDate = processGameData(gamesOfMonth || []); // Use processGameData
+            const gamesByDate = processGameData(gamesOfMonth || []);
 
             const firstDayOfMonth = new Date(year, month, 1);
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -172,12 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(`[${renderID}] Render error:`, error);
             calendarGrid.innerHTML = `<p style="color: red; grid-column: 1 / -1; text-align: center; padding: 20px;">${error.message || 'Failed to load game data.'}</p>`;
         } finally {
+            // Always hide loading if this was the latest request that finished processing
             console.log(`[${renderID}] Finishing render.`);
-            hideLoading(); // Always hide if latest
+            hideLoading();
         }
     }
 
-    // createDayCell appends directly
     function createDayCell(dayNumber, isOtherMonth = false, gamesArray = []) {
         const dayCell = document.createElement('div'); dayCell.classList.add('calendar-day'); dayCell.dataset.day = dayNumber; if (isOtherMonth) dayCell.classList.add('other-month');
         const daySpan = document.createElement('div'); daySpan.classList.add('day-number'); daySpan.textContent = dayNumber !== null ? dayNumber : ''; dayCell.appendChild(daySpan);
@@ -193,31 +183,50 @@ document.addEventListener('DOMContentLoaded', () => {
         calendarGrid.appendChild(dayCell);
    }
 
-
     // --- API Call Functions (Using Proxy) ---
     async function fetchGamesForMonth(year, month) {
         const firstDay = `${year}-${String(month + 1).padStart(2, '0')}-01`;
         const lastDayDate = new Date(year, month + 1, 0);
         const lastDay = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDayDate.getDate()).padStart(2, '0')}`;
-        const pageSize = 100;
-        const ordering = 'released,-added,-rating,-metacritic';
-        const params = new URLSearchParams({ dates: `${firstDay},${lastDay}`, ordering: ordering, page_size: pageSize });
+        const params = new URLSearchParams({ dates: `${firstDay},${lastDay}`, ordering: 'released,-added,-rating,-metacritic', page_size: 100 });
         const proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`;
-        console.log("Fetching month games (via proxy):", proxyUrl);
         try {
-            const response = await fetch(proxyUrl);
-            if (!response.ok) { let errorDetail = `Proxy Error ${response.status}`; try { const errorData = await response.json(); errorDetail = errorData.detail || errorData.error || errorDetail; } catch(e){ errorDetail = `${errorDetail} ${response.statusText}`;} throw new Error(`Failed to fetch games: ${errorDetail}`); }
-            const data = await response.json(); return data.results || [];
-        } catch (error) { console.error('Fetch failed:', error); throw error; }
+            const response = await fetch(proxyUrl); if (!response.ok) { let e = `Proxy Error ${response.status}`; try{const d=await response.json();e=d.detail||d.error||e}catch(err){} throw new Error(`Fetch games failed: ${e}`); } const data = await response.json(); return data.results || [];
+        } catch (error) { console.error('Fetch games failed:', error); throw error; }
     }
+
+    // --- Suggestion Search Feature ---
     async function fetchSuggestions(query) {
         if (!query) return [];
         const params = new URLSearchParams({ search: query, page_size: 5, search_precise: 'true' });
-        const proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`;
+        const proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`; // Uses proxy
         try {
             const response = await fetch(proxyUrl); if (!response.ok) { console.error(`Suggestion fetch error: ${response.status}`); return []; } const data = await response.json(); return data.results || [];
         } catch (error) { console.error('Failed to fetch suggestions:', error); return []; }
     }
+
+    function displaySuggestions(games) {
+        suggestionsContainer.innerHTML = '';
+        if (!games || games.length === 0) { suggestionsContainer.style.display = 'none'; return; }
+        games.forEach(game => {
+            const div = document.createElement('div'); div.classList.add('suggestion-item'); div.textContent = game.name;
+            if (game.released) { const year = game.released.substring(0, 4); const yearSpan = document.createElement('small'); yearSpan.textContent = ` (${year})`; div.appendChild(yearSpan); }
+            div.dataset.gameData = JSON.stringify(game);
+            div.addEventListener('click', () => handleSuggestionClick(game)); suggestionsContainer.appendChild(div);
+        });
+        suggestionsContainer.style.display = 'block';
+    }
+
+    function handleSuggestionClick(game) {
+        searchInput.value = game.name; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = '';
+        searchAndJumpToGame(game.name); // Jump after click
+    }
+
+    const debouncedFetchSuggestions = debounce(async (query) => { const games = await fetchSuggestions(query); displaySuggestions(games); }, SUGGESTION_DEBOUNCE_DELAY);
+    // --- End Suggestion Search ---
+
+
+    // --- Search and Jump Feature ---
     async function searchAndJumpToGame(query) {
         if (!query) return;
         const renderID = ++currentRenderID; showLoading(); suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = '';
@@ -225,43 +234,54 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`[${renderID}] Searching game (via proxy):`, proxyUrl);
         try {
             let response = await fetch(proxyUrl); let data = await response.json();
-            if (!response.ok || !data.results || data.results.length === 0) { params = new URLSearchParams({ search: query, page_size: 1 }); proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`; response = await fetch(proxyUrl); if (!response.ok) { let errorDetail = `Proxy Error ${response.status}`; try{ const errorData = await response.json(); errorDetail = errorData.detail || errorData.error || `Search Failed`; } catch(e) {} throw new Error(errorDetail); } data = await response.json(); }
+            if (!response.ok || !data.results || data.results.length === 0) { params = new URLSearchParams({ search: query, page_size: 1 }); proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`; response = await fetch(proxyUrl); if (!response.ok) { let e = `Proxy Error ${response.status}`; try{const d=await response.json();e=d.detail||d.error||`Search Failed`} catch(err){} throw new Error(e); } data = await response.json(); }
             if (data.results && data.results.length > 0) foundGame = data.results[0];
         } catch (error) { console.error(`[${renderID}] Failed to search for game:`, error); searchError = error; }
-        if (renderID !== currentRenderID) { console.log(`[${renderID}] Search jump aborted (stale).`); return; }
+
+        if (renderID !== currentRenderID) { console.log(`[${renderID}] Search jump aborted (stale).`); return; } // Check if stale
+
         console.log(`[${renderID}] Processing search result...`);
         if (searchError) { alert(`Error searching for game: ${searchError.message}`); hideLoading(); }
         else if (foundGame) { console.log(`[${renderID}] Found game:`, foundGame.name, foundGame.released);
             if (foundGame.released) {
-                try { const releaseDate = new Date(foundGame.released + 'T00:00:00'); const targetYear = releaseDate.getFullYear(); const targetMonth = releaseDate.getMonth(); if (!isNaN(targetYear) && !isNaN(targetMonth)) { currentDate = new Date(targetYear, targetMonth, 1); await renderCalendar(targetYear, targetMonth); } else { throw new Error("Invalid date parsed."); } }
+                try { const releaseDate = new Date(foundGame.released + 'T00:00:00'); const targetYear = releaseDate.getFullYear(); const targetMonth = releaseDate.getMonth(); if (!isNaN(targetYear) && !isNaN(targetMonth)) { currentDate = new Date(targetYear, targetMonth, 1); await renderCalendar(targetYear, targetMonth); } else { throw new Error("Invalid date parsed."); } } // renderCalendar handles hideLoading
                 catch (dateError) { console.error("Error parsing release date:", foundGame.released, dateError); alert(`Found '${foundGame.name}' but couldn't parse its release date (${foundGame.released}).`); hideLoading(); }
             } else { alert(`Found '${foundGame.name}' but it doesn't have a specific release date listed.`); hideLoading(); }
         } else { alert(`Game "${query}" not found.`); hideLoading(); }
     }
+    // --- End Search and Jump ---
 
-    // --- Suggestion Display Logic ---
-    function displaySuggestions(games) { /* ... (no changes) ... */ }
-    function handleSuggestionClick(game) { /* ... (no changes) ... */ }
-    const debouncedFetchSuggestions = debounce(async (query) => { const games = await fetchSuggestions(query); displaySuggestions(games); }, SUGGESTION_DEBOUNCE_DELAY);
 
-    // --- Date Seek Functionality ---
-    function handleSeek() { /* ... (no changes) ... */ }
+    // --- Date Seek Feature ---
+    function handleSeek() {
+        const selectedMonth = parseInt(seekMonthSelect.value, 10); const enteredYear = parseInt(seekYearInput.value, 10);
+        if (isNaN(selectedMonth) || isNaN(enteredYear) || enteredYear < 1970 || enteredYear > 2100) { alert("Please enter a valid month and year (e.g., 1970-2100)."); return; }
+        currentDate = new Date(enteredYear, selectedMonth, 1);
+        searchInput.value = ''; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = '';
+        renderCalendar(currentDate.getFullYear(), currentDate.getMonth()); // Render new date
+    }
+    // --- End Date Seek ---
+
 
     // --- Helper Functions ---
     function getMonthName(monthIndex) { return monthNames[monthIndex]; }
     // showLoading/hideLoading defined above
 
-    // --- Event Listeners ---
+    // --- Event Listeners (Including Search/Seek/Suggestions) ---
     prevMonthButton.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); searchInput.value = ''; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; renderCalendar(currentDate.getFullYear(), currentDate.getMonth()); });
     nextMonthButton.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); searchInput.value = ''; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; renderCalendar(currentDate.getFullYear(), currentDate.getMonth()); });
+    // Suggestion listener
     searchInput.addEventListener('input', () => { const query = searchInput.value.trim(); if (query.length > 1) { debouncedFetchSuggestions(query); } else { suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; } });
+    // Search jump listener
     searchInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); searchAndJumpToGame(searchInput.value.trim()); } else if (event.key === 'Escape') { suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; } });
+    // Hide suggestions listener
     document.addEventListener('click', (event) => { if (!searchInput.contains(event.target) && !suggestionsContainer.contains(event.target)) { suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; } });
+    // Seek listeners
     seekButton.addEventListener('click', handleSeek);
     seekYearInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') { event.preventDefault(); handleSeek(); } });
 
     // --- Initial Load ---
-    populateSeekControls();
-    renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+    populateSeekControls(); // Setup seek dropdowns
+    renderCalendar(currentDate.getFullYear(), currentDate.getMonth()); // Initial render
 
 }); // End DOMContentLoaded
