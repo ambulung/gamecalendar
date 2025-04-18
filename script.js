@@ -65,6 +65,41 @@ document.addEventListener('DOMContentLoaded', () => {
         seekYearInput.value = currentDate.getFullYear();
     }
 
+    // --- Data Processing Function --- // *** ADDED BACK HERE ***
+    function processGameData(games) {
+        const gamesByDate = {}; // Initialize an empty object to store games by date
+        if (!games || games.length === 0) {
+            // If no games array is provided or it's empty, return the empty object
+            return gamesByDate;
+        }
+
+        games.forEach(game => {
+            // Iterate over each game in the input array
+            if (game.released && game.name) {
+                // Check if the game has both a release date and a name
+                const releaseDate = game.released; // Get the release date string (YYYY-MM-DD)
+
+                // Initialize an empty array for this date if it doesn't exist yet
+                if (!gamesByDate[releaseDate]) {
+                    gamesByDate[releaseDate] = [];
+                }
+
+                // Add the game to the array for this date, but only if we haven't reached the limit
+                if (gamesByDate[releaseDate].length < MAX_GAMES_PER_DAY) {
+                    // Optional: Check if this specific game (by ID) is already in the list for this day
+                    // This prevents potential duplicates if the API somehow returns the same game multiple times for a query
+                    if (!gamesByDate[releaseDate].some(existingGame => existingGame.id === game.id)) {
+                        gamesByDate[releaseDate].push(game); // Add the game
+                    }
+                }
+            }
+        });
+
+        // Return the object containing games grouped by their release date
+        return gamesByDate;
+    }
+
+
     // --- Calendar Logic ---
     function clearSlideshowIntervals() {
         activeSlideshowIntervals.forEach(intervalData => {
@@ -80,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function renderCalendar(year, month) {
         showLoading();
         clearSlideshowIntervals();
-        calendarGrid.innerHTML = '';
+        calendarGrid.innerHTML = ''; // Clear first
         monthYearDisplay.textContent = `${getMonthName(month)} ${year}`;
         seekMonthSelect.value = month;
         seekYearInput.value = year;
@@ -92,14 +127,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Fetch games using the proxy endpoint
             const gamesOfMonth = await fetchGamesForMonth(year, month);
-            const gamesByDate = processGameData(gamesOfMonth);
+            const gamesByDate = processGameData(gamesOfMonth); // Call the function here
 
             // Build Grid Directly (appending)
             for (let i = 0; i < startDayOfWeek; i++) createDayCell(null, true);
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const gamesForDay = gamesByDate[dateStr] || [];
-                createDayCell(day, false, gamesForDay);
+                createDayCell(day, false, gamesForDay); // Use original append logic
             }
             const totalCells = startDayOfWeek + daysInMonth;
             const remainingCells = (7 - (totalCells % 7)) % 7;
@@ -152,41 +187,26 @@ document.addEventListener('DOMContentLoaded', () => {
             if (validGamesWithImages.length > 1) {
                 const intervalId = setInterval(() => {
                     const style = window.getComputedStyle(dayCell);
-                    // Check if element exists and is displayed (relevant for responsive changes)
                     if (!document.body.contains(dayCell) || style.display === 'none') {
                         clearInterval(intervalId);
                         activeSlideshowIntervals = activeSlideshowIntervals.filter(item => item.id !== intervalId);
                         return;
                     }
-                    // Prevent starting a new fade if one is already in progress
                     if (dayCell.classList.contains('is-fading')) return;
 
                      let currentIndex = parseInt(dayCell.dataset.currentImageIndex || '0', 10);
                      const nextIndex = (currentIndex + 1) % validGamesWithImages.length;
                      const nextGame = validGamesWithImages[nextIndex];
-                     // Skip if the next game somehow lacks an image (shouldn't happen with filter)
-                     if (!nextGame || !nextGame.background_image) {
-                          dayCell.dataset.currentImageIndex = String(nextIndex); // Still advance index
-                          return;
-                     }
+                     if (!nextGame || !nextGame.background_image) { dayCell.dataset.currentImageIndex = String(nextIndex); return; }
                      const nextImageUrl = `url(${nextGame.background_image})`;
 
-                     // Set ::after bg to NEXT image
                      dayCell.style.setProperty('--fade-bg-image', nextImageUrl);
-                     // Add class to fade IN ::after
                      dayCell.classList.add('is-fading');
-
-                     // After fade duration, update stable bg & remove class
                      setTimeout(() => {
-                          if (!document.body.contains(dayCell) || !dayCell.classList.contains('is-fading')) {
-                               if (dayCell.classList) { // Check element still exists
-                                 dayCell.classList.remove('is-fading');
-                                 dayCell.style.removeProperty('--fade-bg-image');
-                               } return;
-                          }
-                          dayCell.style.backgroundImage = nextImageUrl; // Set stable bg
-                          dayCell.classList.remove('is-fading'); // Fade out ::after
-                          dayCell.dataset.currentImageIndex = String(nextIndex); // Update index
+                          if (!document.body.contains(dayCell) || !dayCell.classList.contains('is-fading')) { if (dayCell.classList) { dayCell.classList.remove('is-fading'); dayCell.style.removeProperty('--fade-bg-image'); } return; }
+                          dayCell.style.backgroundImage = nextImageUrl;
+                          dayCell.classList.remove('is-fading');
+                          dayCell.dataset.currentImageIndex = String(nextIndex);
                      }, FADE_DURATION);
                 }, SLIDESHOW_INTERVAL);
                 activeSlideshowIntervals.push({ id: intervalId, element: dayCell });
@@ -195,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Append the fully constructed cell to the grid
         calendarGrid.appendChild(dayCell);
     }
+
 
     // --- API Call Functions (Using Proxy) ---
 
@@ -406,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial Load ---
     populateSeekControls();
-    // REMOVED: setupResizeObserver(); // No longer needed
+    // REMOVED: setupResizeObserver(); // No longer using dynamic height
     renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
 
 }); // End DOMContentLoaded
