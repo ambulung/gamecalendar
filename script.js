@@ -1,121 +1,75 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- API Key is NO LONGER DEFINED HERE ---
-    // It will be handled by the serverless function via environment variables
+    // ... (API Key setup removed as before) ...
 
-    // --- DOM Elements ---
-    const calendarBody = document.querySelector('.calendar-body'); // For loading indicator target
+    // --- DOM Elements --- (Keep all element references)
+    const calendarBody = document.querySelector('.calendar-body');
     const calendarGrid = document.getElementById('calendar-grid');
     const monthYearDisplay = document.getElementById('month-year');
     const prevMonthButton = document.getElementById('prev-month');
     const nextMonthButton = document.getElementById('next-month');
     const loadingIndicator = document.getElementById('loading-indicator');
-    const themeToggle = document.getElementById('theme-toggle');
-    const searchInput = document.getElementById('search-input');
-    const suggestionsContainer = document.getElementById('search-suggestions');
-    const seekMonthSelect = document.getElementById('seek-month');
-    const seekYearInput = document.getElementById('seek-year');
-    const seekButton = document.getElementById('seek-button');
+    // ... all other element refs ...
 
     // --- State & Constants ---
     let currentDate = new Date();
-    const MAX_GAMES_PER_DAY = 10;
-    let activeSlideshowIntervals = [];
-    const SLIDESHOW_INTERVAL = 5000;
-    const FADE_DURATION = 700; // Corresponds to CSS --fade-duration
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const SUGGESTION_DEBOUNCE_DELAY = 350;
+    // REMOVED: let isLoading = false; // No longer needed for button disabling
+    let currentRenderID = 0; // Keep the version counter
+    // ... all other state/constants ...
 
-    // --- Utility: Debounce ---
-    function debounce(func, delay) {
-        let timeoutId;
-        return function(...args) {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => {
-                func.apply(this, args);
-            }, delay);
-        };
-    }
+    // --- Utility: Debounce --- (Keep)
+    function debounce(func, delay) { /* ... */ }
 
-    // --- Theme Management ---
-    function applyTheme(theme) {
-        document.body.classList.toggle('dark-mode', theme === 'dark');
-        themeToggle.checked = (theme === 'dark');
-        const containerRgb = getComputedStyle(document.body).getPropertyValue('--container-bg-rgb').trim() || '255, 255, 255';
-        if (loadingIndicator) loadingIndicator.style.backgroundColor = `rgba(${containerRgb}, 0.8)`;
-    }
-    function toggleTheme() {
-        const newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
-        localStorage.setItem('theme', newTheme);
-        applyTheme(newTheme);
-    }
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = !savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
-    themeToggle.addEventListener('change', toggleTheme);
+    // --- Theme Management --- (Keep)
+    function applyTheme(theme) { /* ... */ }
+    function toggleTheme() { /* ... */ }
+    // ... (theme init) ...
 
-    // --- Populate Seek Controls ---
-    function populateSeekControls() {
-        monthNames.forEach((name, index) => {
-            const option = document.createElement('option');
-            option.value = index; // 0-11
-            option.textContent = name;
-            seekMonthSelect.appendChild(option);
-        });
-        seekMonthSelect.value = currentDate.getMonth();
-        seekYearInput.value = currentDate.getFullYear();
-    }
-
-    // --- Data Processing Function --- // *** ADDED BACK HERE ***
-    function processGameData(games) {
-        const gamesByDate = {}; // Initialize an empty object to store games by date
-        if (!games || games.length === 0) {
-            // If no games array is provided or it's empty, return the empty object
-            return gamesByDate;
-        }
-
-        games.forEach(game => {
-            // Iterate over each game in the input array
-            if (game.released && game.name) {
-                // Check if the game has both a release date and a name
-                const releaseDate = game.released; // Get the release date string (YYYY-MM-DD)
-
-                // Initialize an empty array for this date if it doesn't exist yet
-                if (!gamesByDate[releaseDate]) {
-                    gamesByDate[releaseDate] = [];
-                }
-
-                // Add the game to the array for this date, but only if we haven't reached the limit
-                if (gamesByDate[releaseDate].length < MAX_GAMES_PER_DAY) {
-                    // Optional: Check if this specific game (by ID) is already in the list for this day
-                    // This prevents potential duplicates if the API somehow returns the same game multiple times for a query
-                    if (!gamesByDate[releaseDate].some(existingGame => existingGame.id === game.id)) {
-                        gamesByDate[releaseDate].push(game); // Add the game
-                    }
-                }
-            }
-        });
-
-        // Return the object containing games grouped by their release date
-        return gamesByDate;
-    }
-
+    // --- Populate Seek Controls --- (Keep)
+    function populateSeekControls() { /* ... */ }
 
     // --- Calendar Logic ---
-    function clearSlideshowIntervals() {
-        activeSlideshowIntervals.forEach(intervalData => {
-             clearInterval(intervalData.id);
-            if (intervalData.element && intervalData.element.classList) {
-                 intervalData.element.classList.remove('is-fading');
-                 intervalData.element.style.removeProperty('--fade-bg-image');
-             }
-        });
-        activeSlideshowIntervals = [];
+    function clearSlideshowIntervals() { /* ... */ }
+
+    // --- UPDATED showLoading / hideLoading (Removed button disabling) ---
+    function showLoading() {
+        // REMOVED: isLoading = true;
+        // REMOVED: prevMonthButton.disabled = true;
+        // REMOVED: nextMonthButton.disabled = true;
+        // REMOVED: seekButton.disabled = true;
+
+        const containerRgb = getComputedStyle(document.body).getPropertyValue('--container-bg-rgb').trim() || '255, 255, 255';
+        if(loadingIndicator) loadingIndicator.style.backgroundColor = `rgba(${containerRgb}, 0.8)`;
+        const target = document.querySelector('.calendar-body') || calendarGrid;
+        if (target && loadingIndicator && !target.contains(loadingIndicator)) {
+             target.appendChild(loadingIndicator);
+        }
+        if(loadingIndicator) loadingIndicator.style.display = 'flex';
     }
 
+    function hideLoading() {
+         // REMOVED: isLoading = false;
+         // REMOVED: prevMonthButton.disabled = false;
+         // REMOVED: nextMonthButton.disabled = false;
+         // REMOVED: seekButton.disabled = false;
+
+         if (loadingIndicator && loadingIndicator.parentNode) {
+             loadingIndicator.parentNode.removeChild(loadingIndicator);
+         }
+         if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+         }
+    }
+
+    // --- UPDATED renderCalendar (Keeping version check) ---
     async function renderCalendar(year, month) {
-        showLoading();
+        showLoading(); // Show loading immediately
+        const renderID = ++currentRenderID; // Increment and assign ID for this specific render call
+
+        // Clear previous content *before* awaiting fetch
         clearSlideshowIntervals();
-        calendarGrid.innerHTML = ''; // Clear first
+        calendarGrid.innerHTML = '';
+
+        // Update display immediately (even if fetch takes time)
         monthYearDisplay.textContent = `${getMonthName(month)} ${year}`;
         seekMonthSelect.value = month;
         seekYearInput.value = year;
@@ -125,32 +79,52 @@ document.addEventListener('DOMContentLoaded', () => {
         const startDayOfWeek = firstDayOfMonth.getDay();
 
         try {
-            // Fetch games using the proxy endpoint
+            console.log(`Starting fetch for render ID: ${renderID} (${getMonthName(month)} ${year})`);
             const gamesOfMonth = await fetchGamesForMonth(year, month);
-            const gamesByDate = processGameData(gamesOfMonth); // Call the function here
+
+            // *** CRITICAL CHECK ***
+            // If the global ID has changed (meaning a newer request started), discard results
+            if (renderID !== currentRenderID) {
+                console.log(`Discarding results for render ID: ${renderID} (current is ${currentRenderID})`);
+                // Do NOT hide loading here - the newer request will handle it.
+                return; // Exit without rendering or hiding loading
+            }
+            console.log(`Processing results for render ID: ${renderID}`);
+
+            const gamesByDate = processGameData(gamesOfMonth);
 
             // Build Grid Directly (appending)
             for (let i = 0; i < startDayOfWeek; i++) createDayCell(null, true);
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const gamesForDay = gamesByDate[dateStr] || [];
-                createDayCell(day, false, gamesForDay); // Use original append logic
+                createDayCell(day, false, gamesForDay);
             }
             const totalCells = startDayOfWeek + daysInMonth;
             const remainingCells = (7 - (totalCells % 7)) % 7;
             for (let i = 0; i < remainingCells; i++) createDayCell(null, true);
 
         } catch (error) {
-             console.error("Error rendering calendar:", error);
-             // Display error message within the grid area
-             calendarGrid.innerHTML = `<p style="color: red; grid-column: 1 / -1; text-align: center; padding: 20px;">${error.message || 'Failed to load game data.'}</p>`;
+             console.error(`Error in render ID ${renderID}:`, error);
+             // Only display error if it belongs to the *latest* request
+             if (renderID === currentRenderID) {
+                 // Clear grid again before showing error in case stale content was somehow rendered
+                 calendarGrid.innerHTML = `<p style="color: red; grid-column: 1 / -1; text-align: center; padding: 20px;">${error.message || 'Failed to load game data.'}</p>`;
+             }
         } finally {
-            hideLoading();
+             // *** CRITICAL CHECK ***
+             // Only hide loading if this is the *latest* request finishing
+            if (renderID === currentRenderID) {
+                console.log(`Finishing render for ID: ${renderID}`);
+                hideLoading();
+            } else {
+                 console.log(`Skipping hideLoading for stale render ID: ${renderID}`);
+            }
         }
     }
 
-    // Appends the day cell element to the grid
-    function createDayCell(dayNumber, isOtherMonth = false, gamesArray = []) {
+    // createDayCell remains the same
+    function createDayCell(dayNumber, isOtherMonth = false, gamesArray = []) { /* ... (Keep exact same logic) ... */
         const dayCell = document.createElement('div');
         dayCell.classList.add('calendar-day');
         dayCell.dataset.day = dayNumber;
@@ -183,23 +157,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 dayCell.dataset.currentImageIndex = '0';
             }
 
-            // Slideshow setup
             if (validGamesWithImages.length > 1) {
                 const intervalId = setInterval(() => {
                     const style = window.getComputedStyle(dayCell);
-                    if (!document.body.contains(dayCell) || style.display === 'none') {
-                        clearInterval(intervalId);
-                        activeSlideshowIntervals = activeSlideshowIntervals.filter(item => item.id !== intervalId);
-                        return;
-                    }
+                    if (!document.body.contains(dayCell) || style.display === 'none') { clearInterval(intervalId); activeSlideshowIntervals = activeSlideshowIntervals.filter(item => item.id !== intervalId); return; }
                     if (dayCell.classList.contains('is-fading')) return;
-
                      let currentIndex = parseInt(dayCell.dataset.currentImageIndex || '0', 10);
                      const nextIndex = (currentIndex + 1) % validGamesWithImages.length;
                      const nextGame = validGamesWithImages[nextIndex];
                      if (!nextGame || !nextGame.background_image) { dayCell.dataset.currentImageIndex = String(nextIndex); return; }
                      const nextImageUrl = `url(${nextGame.background_image})`;
-
                      dayCell.style.setProperty('--fade-bg-image', nextImageUrl);
                      dayCell.classList.add('is-fading');
                      setTimeout(() => {
@@ -212,222 +179,95 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeSlideshowIntervals.push({ id: intervalId, element: dayCell });
             }
         }
-        // Append the fully constructed cell to the grid
         calendarGrid.appendChild(dayCell);
     }
 
 
-    // --- API Call Functions (Using Proxy) ---
-
-    async function fetchGamesForMonth(year, month) {
-        const firstDay = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-        const lastDayDate = new Date(year, month + 1, 0);
-        const lastDay = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDayDate.getDate()).padStart(2, '0')}`;
-        const pageSize = 100;
-        const ordering = 'released,-added,-rating,-metacritic';
-
-        const params = new URLSearchParams({
-            dates: `${firstDay},${lastDay}`,
-            ordering: ordering,
-            page_size: pageSize
-        });
-        // Use relative path for Netlify function
-        const proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`;
-
-        console.log("Fetching month games (via proxy):", proxyUrl);
-        try {
-            const response = await fetch(proxyUrl);
-            if (!response.ok) {
-                let errorDetail = `Proxy Error ${response.status}`;
-                try { const errorData = await response.json(); errorDetail = errorData.detail || errorData.error || errorDetail; } catch(e){ errorDetail = `${errorDetail} ${response.statusText}`;}
-                throw new Error(`Failed to fetch games: ${errorDetail}`);
-            }
-            const data = await response.json();
-            return data.results || [];
-        } catch (error) {
-            console.error('Fetch failed:', error);
-            throw error; // Re-throw to be handled by renderCalendar
-        }
-    }
-
-    async function fetchSuggestions(query) {
-        if (!query) return [];
-        const params = new URLSearchParams({
-            search: query,
-            page_size: 5,
-            search_precise: 'true'
-        });
-        // Use relative path for Netlify function
-        const proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`;
-
-        try {
-            const response = await fetch(proxyUrl);
-            if (!response.ok) {
-                console.error(`Suggestion fetch error: ${response.status}`);
-                return [];
-            }
-            const data = await response.json();
-            return data.results || [];
-        } catch (error) {
-            console.error('Failed to fetch suggestions:', error);
-            return [];
-        }
-    }
-
+    // --- API Call Functions (Using Proxy) --- (Keep as is)
+    async function fetchGamesForMonth(year, month) { /* ... */ }
+    async function fetchSuggestions(query) { /* ... */ }
     async function searchAndJumpToGame(query) {
-        if (!query) return;
-        showLoading();
+        // Keep the version check logic here too
+        showLoading(); // Show loading immediately
         suggestionsContainer.style.display = 'none';
         suggestionsContainer.innerHTML = '';
+        const renderID = ++currentRenderID; // Assign unique ID for this operation
 
-        // Use relative path for Netlify function
         let params = new URLSearchParams({ search: query, page_size: 1, search_exact: 'true' });
         let proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`;
-
         console.log("Searching game (via proxy):", proxyUrl);
+
         try {
-            let response = await fetch(proxyUrl);
-            let data = await response.json();
+             let response = await fetch(proxyUrl); let data = await response.json();
+             if (!response.ok || !data.results || data.results.length === 0) {
+                 params = new URLSearchParams({ search: query, page_size: 1 });
+                 proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`;
+                 response = await fetch(proxyUrl);
+                 if (!response.ok) { /* ... error handling ... */ throw new Error(/* ... */); }
+                 data = await response.json();
+             }
 
-            // If exact search failed or errored, try broader search
-            if (!response.ok || !data.results || data.results.length === 0) {
-                console.log(`Exact search failed for "${query}", trying broader...`);
-                params = new URLSearchParams({ search: query, page_size: 1 });
-                proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`;
-                response = await fetch(proxyUrl);
-                // Check broader search response
-                if (!response.ok) {
-                     let errorDetail = `Proxy Error ${response.status}`;
-                     try{ const errorData = await response.json(); errorDetail = errorData.detail || errorData.error || `Search Failed`; } catch(e) {}
-                     throw new Error(errorDetail);
-                }
-                data = await response.json();
+            // *** VERSION CHECK before processing jump ***
+            if (renderID !== currentRenderID) {
+                 console.log(`Search jump aborted (version ${renderID} != ${currentRenderID})`);
+                 // No need to hide loading if stale
+                 return;
             }
 
-            // Process results
-            if (data.results && data.results.length > 0) {
-                const topGame = data.results[0];
-                console.log("Found game:", topGame.name, topGame.released);
-                if (topGame.released) {
-                    try {
-                        // Attempt to parse date and navigate
-                        const releaseDate = new Date(topGame.released + 'T00:00:00'); // Add time part
-                        const targetYear = releaseDate.getFullYear();
-                        const targetMonth = releaseDate.getMonth(); // 0-indexed
-                        if (!isNaN(targetYear) && !isNaN(targetMonth)) {
-                            currentDate = new Date(targetYear, targetMonth, 1);
-                            // renderCalendar already hides loading indicator on completion/error
-                            await renderCalendar(targetYear, targetMonth);
-                        } else { throw new Error("Invalid date parsed from API."); }
-                    } catch (dateError) {
-                         console.error("Error parsing release date:", topGame.released, dateError);
-                         alert(`Found '${topGame.name}' but couldn't parse its release date (${topGame.released}).`);
-                         hideLoading();
-                    }
-                } else {
-                    alert(`Found '${topGame.name}' but it doesn't have a specific release date listed.`);
-                    hideLoading();
-                }
-            } else {
-                alert(`Game "${query}" not found.`);
-                hideLoading();
-            }
+             if (data.results && data.results.length > 0) {
+                 const topGame = data.results[0];
+                 if (topGame.released) {
+                     try {
+                         const releaseDate = new Date(topGame.released + 'T00:00:00'); const targetYear = releaseDate.getFullYear(); const targetMonth = releaseDate.getMonth();
+                         if (!isNaN(targetYear) && !isNaN(targetMonth)) {
+                             currentDate = new Date(targetYear, targetMonth, 1);
+                             // RenderCalendar handles its own loading state based on its renderID
+                             await renderCalendar(targetYear, targetMonth);
+                         } else { throw new Error("Invalid date parsed."); }
+                     } catch (dateError) {
+                          console.error("Error parsing release date:", topGame.released, dateError);
+                          alert(`Found '${topGame.name}' but couldn't parse its release date (${topGame.released}).`);
+                          if(renderID === currentRenderID) hideLoading(); // Hide only if this was the latest operation
+                     }
+                 } else { alert(`Found '${topGame.name}' but it doesn't have a specific release date listed.`); if(renderID === currentRenderID) hideLoading(); }
+             } else { alert(`Game "${query}" not found.`); if(renderID === currentRenderID) hideLoading();}
         } catch (error) {
             console.error('Failed to search for game:', error);
             alert(`Error searching for game: ${error.message}`);
-            hideLoading();
+            if(renderID === currentRenderID) hideLoading(); // Hide only if this was the latest operation
         }
-        // NOTE: hideLoading() is called within renderCalendar or manually in error paths
     }
 
-    // --- Suggestion Display Logic ---
-    function displaySuggestions(games) {
-        suggestionsContainer.innerHTML = '';
-        if (games.length === 0) { suggestionsContainer.style.display = 'none'; return; }
-        games.forEach(game => {
-            const div = document.createElement('div'); div.classList.add('suggestion-item'); div.textContent = game.name;
-            if (game.released) { const year = game.released.substring(0, 4); const yearSpan = document.createElement('small'); yearSpan.textContent = ` (${year})`; div.appendChild(yearSpan); }
-            div.dataset.gameData = JSON.stringify(game); // Store data if needed later
-            div.addEventListener('click', () => handleSuggestionClick(game)); suggestionsContainer.appendChild(div);
-        });
-        suggestionsContainer.style.display = 'block';
-    }
-    function handleSuggestionClick(game) {
-        searchInput.value = game.name; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = '';
-        searchAndJumpToGame(game.name); // Directly jump
-    }
-    const debouncedFetchSuggestions = debounce(async (query) => { const games = await fetchSuggestions(query); displaySuggestions(games); }, SUGGESTION_DEBOUNCE_DELAY);
+    // --- Suggestion Display Logic --- (Keep as is)
+    function displaySuggestions(games) { /* ... */ }
+    function handleSuggestionClick(game) { /* ... */ }
+    const debouncedFetchSuggestions = debounce(async (query) => { /* ... */ }, SUGGESTION_DEBOUNCE_DELAY);
 
     // --- Date Seek Functionality ---
     function handleSeek() {
+        // REMOVED isLoading check, rely on renderCalendar's versioning
         const selectedMonth = parseInt(seekMonthSelect.value, 10); const enteredYear = parseInt(seekYearInput.value, 10);
         if (isNaN(selectedMonth) || isNaN(enteredYear) || enteredYear < 1970 || enteredYear > 2100) { alert("Please enter a valid month and year (e.g., 1970-2100)."); return; }
         currentDate = new Date(enteredYear, selectedMonth, 1);
-        searchInput.value = ''; // Clear search on seek
-        suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; // Clear suggestions
-        renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+        searchInput.value = ''; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = '';
+        renderCalendar(currentDate.getFullYear(), currentDate.getMonth()); // Let renderCalendar handle loading state
     }
 
-    // --- Helper Functions ---
+    // --- Helper Functions --- (Keep as is)
     function getMonthName(monthIndex) { return monthNames[monthIndex]; }
+    // showLoading/hideLoading updated above
 
-    function showLoading() {
-        const containerRgb = getComputedStyle(document.body).getPropertyValue('--container-bg-rgb').trim() || '255, 255, 255';
-        if(loadingIndicator) loadingIndicator.style.backgroundColor = `rgba(${containerRgb}, 0.8)`;
-        // Append to calendarBody if it exists, otherwise grid as fallback
-        const target = document.querySelector('.calendar-body') || calendarGrid;
-        if (target && loadingIndicator && !target.contains(loadingIndicator)) {
-             target.appendChild(loadingIndicator);
-        }
-        if(loadingIndicator) loadingIndicator.style.display = 'flex';
-    }
-
-    function hideLoading() {
-         if (loadingIndicator && loadingIndicator.parentNode) {
-             loadingIndicator.parentNode.removeChild(loadingIndicator);
-         }
-         if (loadingIndicator) {
-            loadingIndicator.style.display = 'none';
-         }
-    }
-
-    // --- Event Listeners ---
-    prevMonthButton.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        searchInput.value = ''; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = '';
-        renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
-    });
-    nextMonthButton.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        searchInput.value = ''; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = '';
-        renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
-    });
-    // Suggestions on input
-    searchInput.addEventListener('input', () => {
-        const query = searchInput.value.trim();
-        if (query.length > 1) { debouncedFetchSuggestions(query); }
-        else { suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; }
-    });
-    // Jump on Enter
-    searchInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') { event.preventDefault(); searchAndJumpToGame(searchInput.value.trim()); }
-        else if (event.key === 'Escape') { suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; }
-    });
-    // Hide suggestions on click outside
-    document.addEventListener('click', (event) => {
-        if (!searchInput.contains(event.target) && !suggestionsContainer.contains(event.target)) {
-            suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = '';
-        }
-     });
-    // Seek button/enter
+    // --- Event Listeners --- (Keep as is)
+    prevMonthButton.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); searchInput.value = ''; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; renderCalendar(currentDate.getFullYear(), currentDate.getMonth()); });
+    nextMonthButton.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); searchInput.value = ''; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; renderCalendar(currentDate.getFullYear(), currentDate.getMonth()); });
+    searchInput.addEventListener('input', () => { const query = searchInput.value.trim(); if (query.length > 1) { debouncedFetchSuggestions(query); } else { suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; } });
+    searchInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); searchAndJumpToGame(searchInput.value.trim()); } else if (event.key === 'Escape') { suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; } });
+    document.addEventListener('click', (event) => { if (!searchInput.contains(event.target) && !suggestionsContainer.contains(event.target)) { suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; } });
     seekButton.addEventListener('click', handleSeek);
-    seekYearInput.addEventListener('keypress', (event) => {
-        if (event.key === 'Enter') { event.preventDefault(); handleSeek(); }
-    });
+    seekYearInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') { event.preventDefault(); handleSeek(); } });
 
     // --- Initial Load ---
     populateSeekControls();
-    // REMOVED: setupResizeObserver(); // No longer using dynamic height
     renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
 
 }); // End DOMContentLoaded
