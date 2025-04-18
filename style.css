@@ -22,6 +22,8 @@
     --day-other-month-bg: #f0f0f0;
     --day-other-month-text: #aaaaaa;
     --day-has-game-border: #c4d7ff;
+    --day-highlight-border: #ffaa00; /* Highlight color */
+    --day-highlight-shadow: rgba(255, 170, 0, 0.4); /* Highlight shadow color */
     --day-hover-shadow: rgba(0, 0, 0, 0.15);
     --overlay-bg: rgba(0, 0, 0, 0.65);
     --overlay-text-color: #ffffff;
@@ -52,6 +54,8 @@ body.dark-mode {
     --day-other-month-bg: #2a2a2a;
     --day-other-month-text: #777777;
     --day-has-game-border: #505f7a;
+    --day-highlight-border: #ffcc66; /* Lighter highlight for dark mode */
+    --day-highlight-shadow: rgba(255, 204, 102, 0.3); /* Lighter highlight shadow */
     --day-hover-shadow: rgba(255, 255, 255, 0.1);
     --overlay-bg: rgba(0, 0, 0, 0.6);
     --overlay-text-color: #ffffff;
@@ -71,7 +75,7 @@ body.dark-mode {
 html, body {
     height: 100%;
     margin: 0;
-    /* REMOVED overflow: hidden; */
+    /* overflow: hidden; Let responsive styles handle this */
 }
 
 body {
@@ -110,21 +114,24 @@ body {
 .subtitle,
 .calendar-header,
 .api-credit {
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevent vertical shrinking */
 }
-/* ... styles for headers, search/seek ... */
 .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
 h1 { margin: 0; color: var(--text-color); font-size: 1.7em; flex-grow: 1; text-align: left; }
+
+/* --- Search and Seek Styles --- */
 .search-seek-container { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; padding: 10px 0; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; }
 .search-box, .seek-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .search-seek-container label { font-size: 0.9em; color: var(--secondary-text-color); margin-bottom: 0; }
 .search-input-wrapper { position: relative; flex-grow: 1; }
 .search-seek-container input[type="search"] { width: 100%; box-sizing: border-box; min-width: 150px; padding: 6px 10px; font-size: 0.9em; border: 1px solid var(--input-border); border-radius: var(--radius-small); background-color: var(--input-bg); color: var(--input-text); transition: border-color 0.2s ease; }
+/* --- Search Suggestions --- */
 .suggestions-container { display: none; position: absolute; top: 100%; left: 0; right: 0; background-color: var(--container-bg); border: 1px solid var(--input-border); border-top: none; border-radius: 0 0 var(--radius-small) var(--radius-small); max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: left; }
 .suggestion-item { padding: 8px 12px; font-size: 0.85em; color: var(--text-color); cursor: pointer; border-bottom: 1px solid var(--border-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .suggestion-item:last-child { border-bottom: none; }
 .suggestion-item:hover { background-color: rgba(var(--button-bg-rgb), 0.1); }
 .suggestion-item small { font-size: 0.9em; color: var(--secondary-text-color); margin-left: 5px; }
+/* --- Other Search/Seek Inputs --- */
 .search-seek-container input[type="number"], .search-seek-container select { padding: 6px 10px; font-size: 0.9em; border: 1px solid var(--input-border); border-radius: var(--radius-small); background-color: var(--input-bg); color: var(--input-text); transition: border-color 0.2s ease; }
 .search-seek-container input[type="number"] { width: 70px; -moz-appearance: textfield; }
 .search-seek-container input[type="number"]::-webkit-outer-spin-button, .search-seek-container input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -132,6 +139,8 @@ h1 { margin: 0; color: var(--text-color); font-size: 1.7em; flex-grow: 1; text-a
 .search-seek-container input:focus, .search-seek-container select:focus { outline: none; border-color: var(--input-focus-border); box-shadow: 0 0 0 2px rgba(var(--button-bg-rgb), 0.2); }
 .search-seek-container button { padding: 6px 12px; background-color: var(--button-bg); color: white; border: none; border-radius: var(--radius-small); cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; }
 .search-seek-container button:hover { background-color: var(--button-hover-bg); }
+
+/* --- Subtitle & Calendar Header --- */
 .subtitle { font-size: 0.9em; color: var(--secondary-text-color); margin-top: 0; margin-bottom: 15px; text-align: left; width: 100%; }
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; }
 .calendar-header h2 { margin: 0; font-size: 1.4em; color: var(--text-color); white-space: nowrap; }
@@ -182,6 +191,21 @@ h1 { margin: 0; color: var(--text-color); font-size: 1.7em; flex-grow: 1; text-a
 .calendar-day::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-size: cover; background-position: center; background-repeat: no-repeat; background-image: var(--fade-bg-image); opacity: 0; z-index: 0; transition: opacity var(--fade-duration) ease-in-out; pointer-events: none; border-radius: inherit; }
 .calendar-day.is-fading::after { opacity: 1; }
 
+/* --- Highlight Style for Search Result --- */
+.calendar-day.search-highlight {
+    border-color: var(--day-highlight-border, #ffaa00);
+    box-shadow: 0 0 10px 3px var(--day-highlight-shadow, rgba(255, 170, 0, 0.5));
+    transform: scale(1.04);
+    z-index: 15;
+}
+/* Optional: Adjust hover effect when highlighted */
+.calendar-day.search-highlight:hover { transform: scale(1.05); }
+/* Dark mode adjustments for highlight */
+body.dark-mode .calendar-day.search-highlight {
+    border-color: var(--day-highlight-border, #ffcc66);
+    box-shadow: 0 0 10px 3px var(--day-highlight-shadow, rgba(255, 204, 102, 0.4));
+}
+
 /* Day Number */
 .day-number { font-size: 0.85em; font-weight: bold; color: var(--secondary-text-color); text-align: right; margin-bottom: 4px; padding: 0 5px; position: relative; z-index: 2; text-shadow: 0 0 4px rgba(0,0,0,0.6); }
 .calendar-day.has-game .day-number { color: var(--overlay-text-color); }
@@ -191,7 +215,11 @@ h1 { margin: 0; color: var(--text-color); font-size: 1.7em; flex-grow: 1; text-a
 .calendar-day.other-month .day-number { color: var(--day-other-month-text); text-shadow: none; }
 .calendar-day.other-month::before, .calendar-day.other-month::after { display: none; }
 .calendar-day.other-month .game-list { display: none; }
-.calendar-day.has-game { border-color: var(--day-has-game-border); }
+.calendar-day.has-game { border-color: var(--day-has-game-border); } /* Default border */
+/* Ensure highlighted border overrides default has-game border */
+.calendar-day.has-game.search-highlight { border-color: var(--day-highlight-border, #ffaa00); }
+body.dark-mode .calendar-day.has-game.search-highlight { border-color: var(--day-highlight-border, #ffcc66); }
+
 
 /* --- Game List Styling (Adjust max-height for fixed parent) --- */
 .game-list {
@@ -258,6 +286,7 @@ input:checked + .slider:before { transform: translateX(20px); }
         min-height: 145px;
     }
      .game-list {
+         /* Revert max-height calc for non-fixed parent */
          max-height: calc(100% - 30px);
      }
      .search-seek-container { flex-direction: column; align-items: flex-start; }
@@ -268,7 +297,7 @@ input:checked + .slider:before { transform: translateX(20px); }
     h1 { font-size: 1.6em; }
     .calendar-header h2 { font-size: 1.3em; }
     .game-list { font-size: 0.75em; }
-    .loading { grid-column: 1 / -1; }
+    .loading { grid-column: 1 / -1; position: relative; /* Ensure loader fits flow */}
 }
 
 /* --- Small Screens (Large Mobiles, Tablets Portrait) --- */
@@ -321,6 +350,18 @@ input:checked + .slider:before { transform: translateX(20px); }
     .calendar-day.has-game { display: flex; }
     .calendar-day:hover { transform: none; box-shadow: none; }
     .calendar-day.has-game::before, .calendar-day::after { display: block; }
+    /* Ensure highlight shows in list view */
+     .calendar-day.search-highlight {
+         border-color: var(--day-highlight-border, #ffaa00);
+         box-shadow: 0 0 8px 2px var(--day-highlight-shadow, rgba(255, 170, 0, 0.4)); /* Adjusted shadow for list */
+         transform: none; /* No scale needed in list */
+     }
+     body.dark-mode .calendar-day.search-highlight {
+         border-color: var(--day-highlight-border, #ffcc66);
+         box-shadow: 0 0 8px 2px var(--day-highlight-shadow, rgba(255, 204, 102, 0.3));
+     }
+
+
     .day-number { position: absolute; top: 5px; right: 5px; font-size: 0.8em; font-weight: bold; color: var(--overlay-text-color); background-color: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: var(--radius-small); z-index: 2; margin: 0; min-width: auto; text-shadow: none; }
     .game-list { display: block !important; flex-grow: 1; position: relative; z-index: 2; padding: 0 6px; margin-top: 25px; overflow-y: auto; max-height: calc(100% - 30px); font-size: 0.75em; }
     .game-list-item { background-color: var(--list-item-bg); color: var(--overlay-text-color); border-bottom: none; padding: 3px 6px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: var(--radius-small); }
