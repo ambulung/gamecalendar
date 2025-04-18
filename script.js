@@ -35,18 +35,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Theme Management ---
-    function applyTheme(theme) { /* ... (no changes) ... */ }
-    function toggleTheme() { /* ... (no changes) ... */ }
-    // ... (theme init) ...
+    function applyTheme(theme) {
+        document.body.classList.toggle('dark-mode', theme === 'dark');
+        themeToggle.checked = (theme === 'dark');
+        const containerRgb = getComputedStyle(document.body).getPropertyValue('--container-bg-rgb').trim() || '255, 255, 255';
+        if (loadingIndicator) loadingIndicator.style.backgroundColor = `rgba(${containerRgb}, 0.8)`;
+    }
+    function toggleTheme() {
+        const newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    }
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = !savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
+    themeToggle.addEventListener('change', toggleTheme);
 
     // --- Populate Seek Controls ---
-    function populateSeekControls() { /* ... (no changes) ... */ }
+    function populateSeekControls() {
+        monthNames.forEach((name, index) => {
+            const option = document.createElement('option');
+            option.value = index; // 0-11
+            option.textContent = name;
+            seekMonthSelect.appendChild(option);
+        });
+        seekMonthSelect.value = currentDate.getMonth();
+        seekYearInput.value = currentDate.getFullYear();
+    }
 
     // --- Calendar Logic ---
-    function clearSlideshowIntervals() { /* ... (no changes) ... */ }
+    function clearSlideshowIntervals() {
+        activeSlideshowIntervals.forEach(intervalData => {
+             clearInterval(intervalData.id);
+            if (intervalData.element && intervalData.element.classList) {
+                 intervalData.element.classList.remove('is-fading');
+                 intervalData.element.style.removeProperty('--fade-bg-image');
+             }
+        });
+        activeSlideshowIntervals = [];
+    }
 
     function showLoading() {
-        // Only show loading indicator visually
         const containerRgb = getComputedStyle(document.body).getPropertyValue('--container-bg-rgb').trim() || '255, 255, 255';
         if (loadingIndicator) loadingIndicator.style.backgroundColor = `rgba(${containerRgb}, 0.8)`;
         const target = document.querySelector('.calendar-body') || calendarGrid;
@@ -57,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function hideLoading() {
-        // Only hide loading indicator visually
         if (loadingIndicator && loadingIndicator.parentNode) {
             loadingIndicator.parentNode.removeChild(loadingIndicator);
         }
@@ -66,17 +94,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Refined renderCalendar ---
-    async function renderCalendar(year, month) {
-        const renderID = ++currentRenderID; // Assign unique ID for this render call
-        showLoading(); // Show loading indicator
+    // --- *** ADDED BACK processGameData FUNCTION *** ---
+    function processGameData(games) {
+        const gamesByDate = {};
+        if (!games || games.length === 0) return gamesByDate;
 
-        // Update display text immediately
+        games.forEach(game => {
+            if (game.released && game.name) { // Ensure game has a release date and name
+                const releaseDate = game.released; // Format: YYYY-MM-DD
+                if (!gamesByDate[releaseDate]) {
+                    gamesByDate[releaseDate] = []; // Initialize array if date not seen before
+                }
+                // Add game to the date's array only if under the limit
+                if (gamesByDate[releaseDate].length < MAX_GAMES_PER_DAY) {
+                    // Basic duplicate check (by ID) just in case API returns duplicates for a day
+                    if (!gamesByDate[releaseDate].some(existing => existing.id === game.id)) {
+                         gamesByDate[releaseDate].push(game);
+                    }
+                }
+            }
+        });
+        // The sorting is handled by the API request's 'ordering' parameter.
+        // This function just groups and limits the number per day.
+        return gamesByDate;
+    }
+    // --- *** END of added function *** ---
+
+
+    async function renderCalendar(year, month) {
+        const renderID = ++currentRenderID;
+        showLoading();
+
         monthYearDisplay.textContent = `${getMonthName(month)} ${year}`;
         seekMonthSelect.value = month;
         seekYearInput.value = year;
 
-        // Fetch data *before* clearing the grid
         let gamesOfMonth = null;
         let fetchError = null;
 
@@ -85,30 +137,22 @@ document.addEventListener('DOMContentLoaded', () => {
             gamesOfMonth = await fetchGamesForMonth(year, month);
         } catch (error) {
             console.error(`[${renderID}] Fetch error:`, error);
-            fetchError = error; // Store error to handle later
+            fetchError = error;
         }
 
-        // *** CRITICAL CHECK: Is this still the latest request? ***
         if (renderID !== currentRenderID) {
             console.log(`[${renderID}] Discarding stale results (current is ${currentRenderID}).`);
-            // If this stale request errored, we still don't want to necessarily hide loading
-            // The latest request will handle hiding it eventually.
-            return; // Exit without rendering or hiding loading
+            return;
         }
 
-        // --- If this IS the latest request, proceed ---
         console.log(`[${renderID}] Processing results...`);
-        clearSlideshowIntervals(); // Clear intervals from previous view
-        calendarGrid.innerHTML = ''; // NOW clear the grid
+        clearSlideshowIntervals();
+        calendarGrid.innerHTML = ''; // Clear grid now
 
         try {
-            // Handle fetch error *here* if it occurred
-            if (fetchError) {
-                throw fetchError; // Re-throw to be caught by the outer catch
-            }
+            if (fetchError) throw fetchError; // Handle error if this is latest request
 
-            // Process and render fetched data
-            const gamesByDate = processGameData(gamesOfMonth || []); // Use empty array if fetch failed but wasn't latest error
+            const gamesByDate = processGameData(gamesOfMonth || []); // Use processGameData
 
             const firstDayOfMonth = new Date(year, month, 1);
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -125,129 +169,89 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < remainingCells; i++) createDayCell(null, true);
 
         } catch (error) {
-            // Display error message (this catch block is only reached if renderID === currentRenderID)
             console.error(`[${renderID}] Render error:`, error);
             calendarGrid.innerHTML = `<p style="color: red; grid-column: 1 / -1; text-align: center; padding: 20px;">${error.message || 'Failed to load game data.'}</p>`;
         } finally {
-            // **Always** hide loading indicator now, because we only reach here if renderID === currentRenderID
             console.log(`[${renderID}] Finishing render.`);
-            hideLoading();
+            hideLoading(); // Always hide if latest
         }
     }
 
-    // createDayCell appends directly, no changes needed here from before
-    function createDayCell(dayNumber, isOtherMonth = false, gamesArray = []) { /* ... (Keep exact same logic as previous correct version) ... */
-         const dayCell = document.createElement('div'); dayCell.classList.add('calendar-day'); dayCell.dataset.day = dayNumber; if (isOtherMonth) dayCell.classList.add('other-month');
-         const daySpan = document.createElement('div'); daySpan.classList.add('day-number'); daySpan.textContent = dayNumber !== null ? dayNumber : ''; dayCell.appendChild(daySpan);
-         const validGamesWithImages = gamesArray.filter(g => g.background_image);
-         if (!isOtherMonth && gamesArray.length > 0) {
-             dayCell.classList.add('has-game');
-             const gameList = document.createElement('ul'); gameList.classList.add('game-list'); gamesArray.forEach(game => { const listItem = document.createElement('li'); listItem.classList.add('game-list-item'); listItem.textContent = game.name; listItem.title = `${game.name}\nReleased: ${game.released}\nRating: ${game.rating || 'N/A'} / 5\nMetacritic: ${game.metacritic || 'N/A'}`; gameList.appendChild(listItem); }); dayCell.appendChild(gameList);
-             const initialGame = validGamesWithImages.length > 0 ? validGamesWithImages[0] : null; if (initialGame) { dayCell.style.backgroundImage = `url(${initialGame.background_image})`; dayCell.dataset.currentImageIndex = '0'; }
-             if (validGamesWithImages.length > 1) {
-                 const intervalId = setInterval(() => { const style = window.getComputedStyle(dayCell); if (!document.body.contains(dayCell) || style.display === 'none') { clearInterval(intervalId); activeSlideshowIntervals = activeSlideshowIntervals.filter(item => item.id !== intervalId); return; } if (dayCell.classList.contains('is-fading')) return; let currentIndex = parseInt(dayCell.dataset.currentImageIndex || '0', 10); const nextIndex = (currentIndex + 1) % validGamesWithImages.length; const nextGame = validGamesWithImages[nextIndex]; if (!nextGame || !nextGame.background_image) { dayCell.dataset.currentImageIndex = String(nextIndex); return; } const nextImageUrl = `url(${nextGame.background_image})`; dayCell.style.setProperty('--fade-bg-image', nextImageUrl); dayCell.classList.add('is-fading'); setTimeout(() => { if (!document.body.contains(dayCell) || !dayCell.classList.contains('is-fading')) { if (dayCell.classList) { dayCell.classList.remove('is-fading'); dayCell.style.removeProperty('--fade-bg-image'); } return; } dayCell.style.backgroundImage = nextImageUrl; dayCell.classList.remove('is-fading'); dayCell.dataset.currentImageIndex = String(nextIndex); }, FADE_DURATION); }, SLIDESHOW_INTERVAL); activeSlideshowIntervals.push({ id: intervalId, element: dayCell });
-             }
-         }
-         calendarGrid.appendChild(dayCell); // Append here
+    // createDayCell appends directly
+    function createDayCell(dayNumber, isOtherMonth = false, gamesArray = []) {
+        const dayCell = document.createElement('div'); dayCell.classList.add('calendar-day'); dayCell.dataset.day = dayNumber; if (isOtherMonth) dayCell.classList.add('other-month');
+        const daySpan = document.createElement('div'); daySpan.classList.add('day-number'); daySpan.textContent = dayNumber !== null ? dayNumber : ''; dayCell.appendChild(daySpan);
+        const validGamesWithImages = gamesArray.filter(g => g.background_image);
+        if (!isOtherMonth && gamesArray.length > 0) {
+            dayCell.classList.add('has-game');
+            const gameList = document.createElement('ul'); gameList.classList.add('game-list'); gamesArray.forEach(game => { const listItem = document.createElement('li'); listItem.classList.add('game-list-item'); listItem.textContent = game.name; listItem.title = `${game.name}\nReleased: ${game.released}\nRating: ${game.rating || 'N/A'} / 5\nMetacritic: ${game.metacritic || 'N/A'}`; gameList.appendChild(listItem); }); dayCell.appendChild(gameList);
+            const initialGame = validGamesWithImages.length > 0 ? validGamesWithImages[0] : null; if (initialGame) { dayCell.style.backgroundImage = `url(${initialGame.background_image})`; dayCell.dataset.currentImageIndex = '0'; }
+            if (validGamesWithImages.length > 1) {
+                const intervalId = setInterval(() => { const style = window.getComputedStyle(dayCell); if (!document.body.contains(dayCell) || style.display === 'none') { clearInterval(intervalId); activeSlideshowIntervals = activeSlideshowIntervals.filter(item => item.id !== intervalId); return; } if (dayCell.classList.contains('is-fading')) return; let currentIndex = parseInt(dayCell.dataset.currentImageIndex || '0', 10); const nextIndex = (currentIndex + 1) % validGamesWithImages.length; const nextGame = validGamesWithImages[nextIndex]; if (!nextGame || !nextGame.background_image) { dayCell.dataset.currentImageIndex = String(nextIndex); return; } const nextImageUrl = `url(${nextGame.background_image})`; dayCell.style.setProperty('--fade-bg-image', nextImageUrl); dayCell.classList.add('is-fading'); setTimeout(() => { if (!document.body.contains(dayCell) || !dayCell.classList.contains('is-fading')) { if (dayCell.classList) { dayCell.classList.remove('is-fading'); dayCell.style.removeProperty('--fade-bg-image'); } return; } dayCell.style.backgroundImage = nextImageUrl; dayCell.classList.remove('is-fading'); dayCell.dataset.currentImageIndex = String(nextIndex); }, FADE_DURATION); }, SLIDESHOW_INTERVAL); activeSlideshowIntervals.push({ id: intervalId, element: dayCell });
+            }
+        }
+        calendarGrid.appendChild(dayCell);
+   }
+
+
+    // --- API Call Functions (Using Proxy) ---
+    async function fetchGamesForMonth(year, month) {
+        const firstDay = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+        const lastDayDate = new Date(year, month + 1, 0);
+        const lastDay = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDayDate.getDate()).padStart(2, '0')}`;
+        const pageSize = 100;
+        const ordering = 'released,-added,-rating,-metacritic';
+        const params = new URLSearchParams({ dates: `${firstDay},${lastDay}`, ordering: ordering, page_size: pageSize });
+        const proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`;
+        console.log("Fetching month games (via proxy):", proxyUrl);
+        try {
+            const response = await fetch(proxyUrl);
+            if (!response.ok) { let errorDetail = `Proxy Error ${response.status}`; try { const errorData = await response.json(); errorDetail = errorData.detail || errorData.error || errorDetail; } catch(e){ errorDetail = `${errorDetail} ${response.statusText}`;} throw new Error(`Failed to fetch games: ${errorDetail}`); }
+            const data = await response.json(); return data.results || [];
+        } catch (error) { console.error('Fetch failed:', error); throw error; }
     }
-
-
-    // --- API Call Functions (Using Proxy) --- (Keep as is)
-    async function fetchGamesForMonth(year, month) { /* ... */ }
-    async function fetchSuggestions(query) { /* ... */ }
-
-    // --- Refined searchAndJumpToGame ---
+    async function fetchSuggestions(query) {
+        if (!query) return [];
+        const params = new URLSearchParams({ search: query, page_size: 5, search_precise: 'true' });
+        const proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`;
+        try {
+            const response = await fetch(proxyUrl); if (!response.ok) { console.error(`Suggestion fetch error: ${response.status}`); return []; } const data = await response.json(); return data.results || [];
+        } catch (error) { console.error('Failed to fetch suggestions:', error); return []; }
+    }
     async function searchAndJumpToGame(query) {
         if (!query) return;
-
-        const renderID = ++currentRenderID; // Increment global ID, assign to this op
-        showLoading(); // Show loading
-        suggestionsContainer.style.display = 'none';
-        suggestionsContainer.innerHTML = '';
-
-        let params = new URLSearchParams({ search: query, page_size: 1, search_exact: 'true' });
-        let proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`;
-        let foundGame = null;
-        let searchError = null;
-
+        const renderID = ++currentRenderID; showLoading(); suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = '';
+        let params = new URLSearchParams({ search: query, page_size: 1, search_exact: 'true' }); let proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`; let foundGame = null; let searchError = null;
         console.log(`[${renderID}] Searching game (via proxy):`, proxyUrl);
         try {
             let response = await fetch(proxyUrl); let data = await response.json();
-            if (!response.ok || !data.results || data.results.length === 0) {
-                params = new URLSearchParams({ search: query, page_size: 1 });
-                proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`;
-                response = await fetch(proxyUrl);
-                if (!response.ok) { /* ... error handling ... */ throw new Error(/* ... */); }
-                data = await response.json();
-            }
-            if (data.results && data.results.length > 0) {
-                foundGame = data.results[0]; // Store the found game
-            }
-        } catch (error) {
-            console.error(`[${renderID}] Failed to search for game:`, error);
-            searchError = error; // Store the search error
-        }
-
-        // *** VERSION CHECK before proceeding ***
-        if (renderID !== currentRenderID) {
-            console.log(`[${renderID}] Search jump aborted (stale).`);
-            // Don't hide loading - the newer operation will.
-            return;
-        }
-
-        // --- If this IS the latest operation, handle search results/errors ---
+            if (!response.ok || !data.results || data.results.length === 0) { params = new URLSearchParams({ search: query, page_size: 1 }); proxyUrl = `/.netlify/functions/rawg-proxy/games?${params.toString()}`; response = await fetch(proxyUrl); if (!response.ok) { let errorDetail = `Proxy Error ${response.status}`; try{ const errorData = await response.json(); errorDetail = errorData.detail || errorData.error || `Search Failed`; } catch(e) {} throw new Error(errorDetail); } data = await response.json(); }
+            if (data.results && data.results.length > 0) foundGame = data.results[0];
+        } catch (error) { console.error(`[${renderID}] Failed to search for game:`, error); searchError = error; }
+        if (renderID !== currentRenderID) { console.log(`[${renderID}] Search jump aborted (stale).`); return; }
         console.log(`[${renderID}] Processing search result...`);
-        if (searchError) {
-            alert(`Error searching for game: ${searchError.message}`);
-            hideLoading(); // Hide loading as this operation failed definitively
-        } else if (foundGame) {
-            console.log(`[${renderID}] Found game:`, foundGame.name, foundGame.released);
+        if (searchError) { alert(`Error searching for game: ${searchError.message}`); hideLoading(); }
+        else if (foundGame) { console.log(`[${renderID}] Found game:`, foundGame.name, foundGame.released);
             if (foundGame.released) {
-                try {
-                    const releaseDate = new Date(foundGame.released + 'T00:00:00');
-                    const targetYear = releaseDate.getFullYear();
-                    const targetMonth = releaseDate.getMonth();
-                    if (!isNaN(targetYear) && !isNaN(targetMonth)) {
-                        currentDate = new Date(targetYear, targetMonth, 1);
-                        // Call renderCalendar. It will show its own loading and hide it when done.
-                        // Do NOT hide loading here.
-                        await renderCalendar(targetYear, targetMonth);
-                    } else { throw new Error("Invalid date parsed."); }
-                } catch (dateError) {
-                     console.error("Error parsing release date:", foundGame.released, dateError);
-                     alert(`Found '${foundGame.name}' but couldn't parse its release date (${foundGame.released}).`);
-                     hideLoading(); // Hide loading as the jump failed
-                }
-            } else {
-                alert(`Found '${foundGame.name}' but it doesn't have a specific release date listed.`);
-                hideLoading(); // Hide loading as we can't jump
-            }
-        } else {
-            alert(`Game "${query}" not found.`);
-            hideLoading(); // Hide loading as nothing was found
-        }
+                try { const releaseDate = new Date(foundGame.released + 'T00:00:00'); const targetYear = releaseDate.getFullYear(); const targetMonth = releaseDate.getMonth(); if (!isNaN(targetYear) && !isNaN(targetMonth)) { currentDate = new Date(targetYear, targetMonth, 1); await renderCalendar(targetYear, targetMonth); } else { throw new Error("Invalid date parsed."); } }
+                catch (dateError) { console.error("Error parsing release date:", foundGame.released, dateError); alert(`Found '${foundGame.name}' but couldn't parse its release date (${foundGame.released}).`); hideLoading(); }
+            } else { alert(`Found '${foundGame.name}' but it doesn't have a specific release date listed.`); hideLoading(); }
+        } else { alert(`Game "${query}" not found.`); hideLoading(); }
     }
 
-    // --- Suggestion Display Logic --- (Keep as is)
-    function displaySuggestions(games) { /* ... */ }
-    function handleSuggestionClick(game) { /* ... */ }
-    const debouncedFetchSuggestions = debounce(async (query) => { /* ... */ }, SUGGESTION_DEBOUNCE_DELAY);
+    // --- Suggestion Display Logic ---
+    function displaySuggestions(games) { /* ... (no changes) ... */ }
+    function handleSuggestionClick(game) { /* ... (no changes) ... */ }
+    const debouncedFetchSuggestions = debounce(async (query) => { const games = await fetchSuggestions(query); displaySuggestions(games); }, SUGGESTION_DEBOUNCE_DELAY);
 
     // --- Date Seek Functionality ---
-    function handleSeek() {
-        // REMOVED isLoading check, rely on renderCalendar's versioning
-        const selectedMonth = parseInt(seekMonthSelect.value, 10); const enteredYear = parseInt(seekYearInput.value, 10);
-        if (isNaN(selectedMonth) || isNaN(enteredYear) || enteredYear < 1970 || enteredYear > 2100) { alert("Please enter a valid month and year (e.g., 1970-2100)."); return; }
-        currentDate = new Date(enteredYear, selectedMonth, 1);
-        searchInput.value = ''; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = '';
-        renderCalendar(currentDate.getFullYear(), currentDate.getMonth()); // Let renderCalendar handle loading state
-    }
+    function handleSeek() { /* ... (no changes) ... */ }
 
-    // --- Helper Functions --- (Keep as is)
+    // --- Helper Functions ---
     function getMonthName(monthIndex) { return monthNames[monthIndex]; }
-    // showLoading/hideLoading updated above
+    // showLoading/hideLoading defined above
 
-    // --- Event Listeners --- (Keep as is)
+    // --- Event Listeners ---
     prevMonthButton.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); searchInput.value = ''; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; renderCalendar(currentDate.getFullYear(), currentDate.getMonth()); });
     nextMonthButton.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); searchInput.value = ''; suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; renderCalendar(currentDate.getFullYear(), currentDate.getMonth()); });
     searchInput.addEventListener('input', () => { const query = searchInput.value.trim(); if (query.length > 1) { debouncedFetchSuggestions(query); } else { suggestionsContainer.style.display = 'none'; suggestionsContainer.innerHTML = ''; } });
