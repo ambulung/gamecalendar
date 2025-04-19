@@ -17,59 +17,59 @@
     --input-bg: #ffffff;
     --input-border: #cccccc;
     --input-text: #333333;
-    --input-focus-border: #007bff; /* Standard blue focus */
+    --input-focus-border: #007bff;
     --border-color: #e0e0e0;
     --day-bg: #ffffff;
     --day-other-month-bg: #eeeeee;
     --day-other-month-text: #aaaaaa;
     --day-has-game-border: #cccccc;
-    --day-highlight-border: #E94560; /* Pink highlight */
-    --day-highlight-shadow: rgba(233, 69, 96, 0.4); /* Pink shadow */
+    --day-highlight-border: #E94560;
+    --day-highlight-shadow: rgba(233, 69, 96, 0.4);
     --day-hover-shadow: rgba(0, 0, 0, 0.15);
     --overlay-bg: rgba(0, 0, 0, 0.65);
     --overlay-text-color: #ffffff;
-    --button-bg: #007bff; /* Standard blue button */
-    --button-hover-bg: #0056b3;
+    --button-bg: #007bff; /* Standard blue button in light mode */
+    --button-hover-bg: #0056b3; /* Darker standard blue */
     --scrollbar-thumb: #cccccc;
     --list-item-bg: rgba(0, 0, 0, 0.3);
     --list-item-hover: rgba(0, 0, 0, 0.5);
     --switch-bg: #cccccc;
     --switch-slider-bg: white;
-    --switch-checked-bg: #007bff;
+    --switch-checked-bg: #007bff; /* Standard blue for checked theme toggle */
 
     /* RGB Version for Loader & Focus */
     --container-bg-rgb: 249, 249, 249;
-    --button-bg-rgb: 0, 123, 255;
+    --button-bg-rgb: 0, 123, 255; /* RGB for light mode button */
 }
 
 body.dark-mode {
     /* --- Colors (Neon Highlights Palette for DARK Mode) --- */
-    --bg-color: #0D0D0D; /* Palette: Background */
-    --container-bg: #0D0D0D; /* Palette: Background */
-    --text-color: #FFFFFF; /* Palette: Primary Text */
+    --bg-color: #0D0D0D;
+    --container-bg: #0D0D0D;
+    --text-color: #FFFFFF;
     --secondary-text-color: #AAAAAA;
-    --input-bg: #16213E; /* Dark Blue */
+    --input-bg: #16213E;
     --input-border: #444444;
-    --input-text: #FFFFFF; /* Palette: Primary Text */
-    --input-focus-border: #1E90FF; /* Palette: Accent 2 (Electric Blue) */
+    --input-text: #FFFFFF;
+    --input-focus-border: #1E90FF; /* Accent 2 (Electric Blue) */
     --border-color: #444444;
-    --day-bg: #16213E; /* Dark Blue */
-    --day-other-month-bg: #0D0D0D; /* Palette: Background */
+    --day-bg: #16213E;
+    --day-other-month-bg: #0D0D0D;
     --day-other-month-text: #777777;
-    --day-has-game-border: #00FF85; /* Palette: Accent 1 (Neon Green) */
-    --day-highlight-border: #1E90FF; /* Palette: Accent 2 (Electric Blue) */
-    --day-highlight-shadow: rgba(30, 144, 255, 0.5); /* Shadow from Electric Blue */
+    --day-has-game-border: #00FF85; /* Accent 1 (Neon Green) */
+    --day-highlight-border: #1E90FF; /* Accent 2 (Electric Blue) */
+    --day-highlight-shadow: rgba(30, 144, 255, 0.5);
     --day-hover-shadow: rgba(0, 0, 0, 0.5);
-    --overlay-bg: rgba(0, 0, 0, 0.7); /* Keep dark overlay */
-    --overlay-text-color: #FFFFFF; /* White text */
-    --button-bg: #00FF85; /* Palette: Accent 1 (Neon Green) */
-    --button-hover-bg: #FF0099; /* Palette: Hover Effects (Vivid Pink) */
+    --overlay-bg: rgba(0, 0, 0, 0.7);
+    --overlay-text-color: #FFFFFF;
+    --button-bg: #00FF85; /* Accent 1 (Neon Green) */
+    --button-hover-bg: #FF0099; /* Accent 3 (Vivid Pink) */
     --scrollbar-thumb: #0F3460; /* Dark Blue */
-    --list-item-bg: rgba(255, 255, 255, 0.1); /* Subtle light */
+    --list-item-bg: rgba(255, 255, 255, 0.1);
     --list-item-hover: rgba(255, 255, 255, 0.2);
-    --switch-bg: #444444; /* Dark grey track */
-    --switch-slider-bg: #cccccc; /* Light grey thumb */
-    --switch-checked-bg: #1E90FF; /* Palette: Accent 2 (Electric Blue) when checked */
+    --switch-bg: #444444;
+    --switch-slider-bg: #cccccc;
+    --switch-checked-bg: #1E90FF; /* Accent 2 (Electric Blue) for checked theme toggle */
 
     /* RGB Version for Loader & Focus */
     --container-bg-rgb: 13, 13, 13;
@@ -79,7 +79,7 @@ body.dark-mode {
 
 /* --- General Styles --- */
 html, body { height: 100%; margin: 0; }
-body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; display: flex; justify-content: center; align-items: flex-start; background-color: var(--bg-color); color: var(--text-color); padding: 20px 15px; box-sizing: border-box; transition: background-color 0.3s ease, color 0.3s ease; overflow-y: hidden; /* Hide body scroll on large screens by default */ }
+body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; display: flex; justify-content: center; align-items: flex-start; background-color: var(--bg-color); color: var(--text-color); padding: 20px 15px; box-sizing: border-box; transition: background-color 0.3s ease, color 0.3s ease; overflow-y: hidden; }
 .calendar-container { background-color: var(--container-bg); padding: 20px; border-radius: var(--radius-large); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 100%; max-width: 1200px; text-align: center; transition: background-color 0.3s ease; box-sizing: border-box; display: flex; flex-direction: column; height: calc(100vh - 40px); max-height: calc(100vh - 40px); }
 
 /* --- Header Elements --- */
@@ -89,7 +89,6 @@ h1 { margin: 0; color: var(--text-color); font-size: 1.7em; flex-grow: 1; text-a
 .header-controls { display: flex; align-items: center; gap: 15px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
 .theme-switcher { display: flex; align-items: center; gap: 8px; }
 .theme-switcher span { font-size: 0.9em; color: var(--secondary-text-color); white-space: nowrap; }
-/* --- Generic Switch Styles --- */
 .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--switch-bg); transition: .4s; border-radius: 24px; }
@@ -114,19 +113,36 @@ input:checked + .slider:before { transform: translateX(20px); }
 .search-seek-container input[type="number"]::-webkit-outer-spin-button, .search-seek-container input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .search-seek-container select { min-width: 120px; }
 .search-seek-container input:focus, .search-seek-container select:focus { outline: none; border-color: var(--input-focus-border); box-shadow: 0 0 0 2px rgba(var(--button-bg-rgb), 0.2); }
-.search-seek-container button { padding: 6px 12px; background-color: var(--button-bg); color: var(--text-color); /* Use text color for contrast on neon green */ border: none; border-radius: var(--radius-small); cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; }
-.search-seek-container button:hover { background-color: var(--button-hover-bg); color: var(--overlay-text-color); /* Change text on hover if needed */ }
-body.light-mode .search-seek-container button { color: white; } /* Ensure white text for light mode blue button */
-body.light-mode .search-seek-container button:hover { color: white; }
+
+/* --- BUTTON TEXT COLOR FIX --- */
+.search-seek-container button { /* Go Button */
+    padding: 6px 12px;
+    background-color: var(--button-bg);
+    color: #000000 !important; /* Black text, important to override theme */
+    font-weight: bold;
+    border: none; border-radius: var(--radius-small); cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease;
+}
+.search-seek-container button:hover {
+    background-color: var(--button-hover-bg);
+    color: #000000 !important; /* Keep black on hover */
+}
 
 /* --- Subtitle & Calendar Header --- */
 .subtitle { font-size: 0.9em; color: var(--secondary-text-color); margin-top: 0; margin-bottom: 15px; text-align: left; width: 100%; }
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; }
 .calendar-header h2 { margin: 0; font-size: 1.4em; color: var(--text-color); white-space: nowrap; }
-.calendar-header button { padding: 7px 14px; background-color: var(--button-bg); color: var(--text-color); border: none; border-radius: var(--radius-medium); cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; white-space: nowrap; }
-.calendar-header button:hover { background-color: var(--button-hover-bg); color: var(--overlay-text-color); }
-body.light-mode .calendar-header button { color: white; } /* Ensure white text for light mode blue button */
-body.light-mode .calendar-header button:hover { color: white; }
+/* --- BUTTON TEXT COLOR FIX --- */
+.calendar-header button { /* Prev/Next Buttons */
+    padding: 7px 14px;
+    background-color: var(--button-bg);
+    color: #000000 !important; /* Black text, important to override theme */
+    font-weight: bold;
+    border: none; border-radius: var(--radius-medium); cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; white-space: nowrap;
+}
+.calendar-header button:hover {
+    background-color: var(--button-hover-bg);
+    color: #000000 !important; /* Keep black on hover */
+}
 
 /* --- Calendar Body (Weekdays + Grid) - Allow Vertical Scroll --- */
 .calendar-body { flex-grow: 1; overflow-y: auto; overflow-x: hidden; position: relative; padding-right: 5px; margin-right: -5px; }
@@ -161,9 +177,7 @@ body.light-mode .calendar-header button:hover { color: white; }
 .calendar-day.other-month .day-number { color: var(--day-other-month-text); text-shadow: none; }
 .calendar-day.other-month::before, .calendar-day.other-month::after { display: none; }
 .calendar-day.other-month .game-list { display: none; }
-/* Default has-game border (if not highlighted) */
 .calendar-day.has-game { border-color: var(--day-has-game-border); }
-/* Ensure highlighted border overrides default */
 .calendar-day.has-game.search-highlight { border-color: var(--day-highlight-border); }
 
 /* --- Game List Styling (Adjust max-height for fixed parent) --- */
@@ -173,19 +187,9 @@ body.light-mode .calendar-header button:hover { color: white; }
 .game-list::-webkit-scrollbar-track { background: transparent; }
 .game-list-item { padding: 3px 6px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; border-radius: var(--radius-small); color: var(--overlay-text-color); background-color: var(--list-item-bg); transition: background-color 0.2s ease; }
 .game-list-item:hover { background-color: var(--list-item-hover); }
-/* Make clickable list items visually distinct */
-.game-list-item[style*="cursor: pointer"] {
-    text-decoration: underline dotted; /* Add underline for clickable */
-    text-decoration-color: var(--overlay-text-color);
-}
-.game-list-item[style*="cursor: pointer"]:hover {
-     color: var(--button-hover-bg); /* Change text color on hover for links */
-     text-decoration-color: var(--button-hover-bg);
-}
-body.light-mode .game-list-item[style*="cursor: pointer"]:hover {
-     color: var(--button-bg); /* Light mode link hover */
-     text-decoration-color: var(--button-bg);
-}
+.game-list-item[style*="cursor: pointer"] { text-decoration: underline dotted; text-decoration-color: var(--overlay-text-color); }
+.game-list-item[style*="cursor: pointer"]:hover { color: var(--button-hover-bg); text-decoration-color: var(--button-hover-bg); }
+body.light-mode .game-list-item[style*="cursor: pointer"]:hover { color: var(--button-bg); text-decoration-color: var(--button-bg); }
 
 /* --- Loading Indicator --- */
 .loading { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; background-color: rgba(var(--container-bg-rgb), 0.8); font-size: 1.2em; color: var(--secondary-text-color); z-index: 20; border-radius: var(--radius-medium); transition: background-color 0.3s ease; }
@@ -270,6 +274,11 @@ body.light-mode .game-list-item[style*="cursor: pointer"]:hover {
     .game-list-item { background-color: var(--list-item-bg); color: var(--overlay-text-color); border-bottom: none; padding: 3px 6px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: var(--radius-small); }
     .game-list-item:last-child { border-bottom: none; }
     .game-list-item:hover { background-color: var(--list-item-hover); color: var(--overlay-text-color); }
+    /* Ensure clickable style is visible */
+    .game-list-item[style*="cursor: pointer"] { text-decoration: underline dotted; }
+    .game-list-item[style*="cursor: pointer"]:hover { color: var(--button-hover-bg); } /* Use hover color */
+    body.light-mode .game-list-item[style*="cursor: pointer"]:hover { color: var(--button-bg); }
+
     .loading { grid-column: auto; border-radius: var(--radius-medium); position: relative; min-height: 100px; }
     .api-credit { font-size: 0.7em; margin-top: 15px;}
 }
