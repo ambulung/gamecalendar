@@ -168,86 +168,61 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Rendering Calendar ---
 
     async function renderCalendar(year, month, highlightDate = null) {
-        if (!calendarGrid || !monthYearDisplay || !seekMonthSelect || !seekYearInput) { console.error("Core elements missing!"); return; }
-        const renderID = ++currentRenderID; // Get unique ID for this render request
-        console.log(`[${renderID}] Attempting to render ${getMonthName(month)} ${year}. Highlight: ${highlightDate || 'None'}. Hide NSFW: ${hideNsfw}`);
-        showLoading(); // Show loading indicator
+        // ... (initial checks, ID, showLoading, etc.) ...
+        console.log(`[${renderID}] Starting render flow.`); // Added log
 
-        // Update display text immediately
-        monthYearDisplay.textContent = `${getMonthName(month)} ${year}`;
-        if (seekMonthSelect) seekMonthSelect.value = month;
-        if (seekYearInput) seekYearInput.value = year;
-
-        let gamesByDate = {}; // Define gamesByDate BEFORE fetch
+        let gamesByDate = {};
         let fetchError = null;
 
         try {
-            console.log(`[${renderID}] Starting fetch...`);
-            const gamesOfMonth = await fetchGamesForMonth(year, month); // Fetch applies filter
-            console.log(`[${renderID}] Fetch successful.`);
+            console.log(`[${renderID}] Before fetchGamesForMonth.`); // Added log
+            gamesOfMonth = await fetchGamesForMonth(year, month);
+            console.log(`[${renderID}] After fetchGamesForMonth. Success.`); // Added log
+        } catch (error) {
+            console.error(`[${renderID}] Fetch error caught:`, error); // Added log
+            fetchError = error;
+        }
 
-             // *** Version check AFTER fetch but BEFORE processing/DOM manipulation ***
-            if (renderID !== currentRenderID) {
-                console.log(`[${renderID}] Discarding stale results (current is ${currentRenderID}).`);
-                 // Do *not* hide loading; the latest op will.
-                return;
+        // *** VERSION CHECK ***
+        if (renderID !== currentRenderID) {
+            console.log(`[${renderID}] Discarding stale results. Exit.`); // Added log
+            return;
+        }
+
+        // --- If this IS the latest ---
+        console.log(`[${renderID}] Latest request processing.`); // Added log
+        clearSlideshowIntervals();
+        calendarGrid.innerHTML = ''; // Clear grid content NOW
+        document.querySelectorAll('.calendar-day.search-highlight').forEach(cell => cell.classList.remove('search-highlight'));
+
+        try {
+            console.log(`[${renderID}] Before checking fetchError.`); // Added log
+            if (fetchError) {
+                 console.error(`[${renderID}] Throwing fetchError in render try block.`); // Added log
+                 throw fetchError; // Re-throw the stored error
             }
+             console.log(`[${renderID}] Before processGameData.`); // Added log
+            const gamesByDate = processGameData(gamesOfMonth || []); // This line should be safe if fetchError is thrown above
+             console.log(`[${renderID}] After processGameData. Games by date count: ${Object.keys(gamesByDate).length}`); // Added log
 
-            // --- If this IS the latest, process data ---
-            console.log(`[${renderID}] This is the latest request. Processing data...`);
-            gamesByDate = processGameData(gamesOfMonth || []); // Assign value here
 
-            // --- Proceed to Render the Grid ---
-            console.log(`[${renderID}] Rendering grid...`);
-            clearSlideshowIntervals(); // Clear old intervals
-            calendarGrid.innerHTML = ''; // Clear grid content NOW
+            console.log(`[${renderID}] Starting grid build loops.`); // Added log
+            // ... (rendering loops using gamesByDate) ...
+            console.log(`[${renderID}] Grid build loops finished.`); // Added log
 
-            // Clear previous search highlights (only if this is the latest render)
-            document.querySelectorAll('.calendar-day.search-highlight').forEach(cell => {
-                cell.classList.remove('search-highlight');
-            });
 
-            const firstDayOfMonth = new Date(year, month, 1);
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const startDayOfWeek = firstDayOfMonth.getDay();
-
-            // Build grid structure and append cells using the populated gamesByDate
-            for (let i = 0; i < startDayOfWeek; i++) createDayCell(null, true);
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const gamesForDay = gamesByDate[dateStr] || []; // Access gamesByDate
-                createDayCell(day, false, gamesForDay, dateStr); // Pass dateStr for data-date
-            }
-            const totalCells = startDayOfWeek + daysInMonth;
-            const remainingCells = (7 - (totalCells % 7)) % 7;
-            for (let i = 0; i < remainingCells; i++) createDayCell(null, true);
-
-            // Apply Highlight if needed for this latest render
-            if (highlightDate) {
-                 console.log(`[${renderID}] Attempting to highlight date: ${highlightDate}`);
-                 const targetCell = calendarGrid.querySelector(`.calendar-day[data-date="${highlightDate}"]`);
-                 if (targetCell) {
-                     targetCell.classList.add('search-highlight');
-                     // Scroll into view if needed
-                     if (targetCell.scrollIntoView) targetCell.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                     console.log(`[${renderID}] Highlight applied.`);
-                 } else {
-                      console.warn(`[${renderID}] Target cell for highlight not found.`);
-                 }
-            }
-            console.log(`[${renderID}] Grid built successfully.`);
-
+            // Apply Highlight (if any)
+            if (highlightDate) { /* ... */ }
+            console.log(`[${renderID}] Highlight logic checked.`); // Added log
 
         } catch (error) {
-            // Display error in the grid (only happens if latest request failed fetch/process)
-            console.error(`[${renderID}] Render/Process error:`, error);
+            console.error(`[${renderID}] Render/Process error caught:`, error); // Added log
             // Ensure grid is clear before showing error
-            clearSlideshowIntervals(); // Clear intervals just in case
+            clearSlideshowIntervals();
             calendarGrid.innerHTML = `<p style="color: red; grid-column: 1 / -1; text-align: center; padding: 20px;">${error.message || 'Failed to load game data.'}</p>`;
 
         } finally {
-            // **Crucially, hide loading indicator because this IS the latest operation finishing**
-            console.log(`[${renderID}] Finalizing render. Hiding loading.`);
+            console.log(`[${renderID}] Entering finally block. Hiding loading.`); // Added log
             hideLoading();
         }
     }
