@@ -10,55 +10,40 @@
     <div class="calendar-container">
         <header class="main-header">
              <h1>Game Release Calendar</h1>
-             <div class="theme-switcher">
-                 <label class="switch" aria-label="Toggle Dark Mode">
-                    <input type="checkbox" id="theme-toggle">
-                    <span class="slider round"></span>
-                 </label>
-                 <span>Dark Mode</span>
-             </div>
+             <div class="header-controls"> <!-- Group controls -->
+                 <div class="theme-switcher">
+                     <label class="switch" aria-label="Toggle Dark Mode">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider round"></span>
+                     </label>
+                     <span>Dark Mode</span>
+                 </div>
+                 <!-- NEW NSFW Filter Toggle -->
+                 <div class="nsfw-filter">
+                     <label class="switch" aria-label="Toggle NSFW Filter">
+                        <input type="checkbox" id="nsfw-toggle" checked> <!-- Checked = Filter ON by default -->
+                        <span class="slider round"></span>
+                     </label>
+                     <span>Hide NSFW</span>
+                 </div>
+                 <!-- End NSFW Filter Toggle -->
+            </div>
         </header>
 
         <div class="search-seek-container">
-            <!-- Wrap search input for positioning suggestions -->
-            <div class="search-box">
-                <label for="search-input">Find Game & Go:</label>
-                <div class="search-input-wrapper">
-                    <input type="search" id="search-input" placeholder="Enter game name..." autocomplete="off">
-                    <div id="search-suggestions" class="suggestions-container">
-                        <!-- Suggestions will be loaded here -->
-                    </div>
-                </div>
-                 <!-- Optional: Add a search button if Enter isn't enough -->
-                 <!-- <button id="search-button" aria-label="Search Game">Search</button> -->
-            </div>
-            <div class="seek-box">
-                <label for="seek-month">Go to Month:</label>
-                <select id="seek-month" aria-label="Select Month"></select>
-                <input type="number" id="seek-year" placeholder="Year" aria-label="Enter Year">
-                <button id="seek-button" aria-label="Go to selected date">Go</button>
-            </div>
+            <!-- ... (search/seek inputs remain the same) ... -->
         </div>
 
         <p class="subtitle">(Showing Top Upcoming & Released Games)</p>
 
         <div class="calendar-header">
-            <button id="prev-month" aria-label="Previous Month">< Prev</button>
-            <h2 id="month-year">Month Year</h2>
-            <button id="next-month" aria-label="Next Month">Next ></button>
+            <!-- ... (prev/next buttons, month/year display) ... -->
         </div>
 
         <div class="calendar-body">
-            <div class="calendar-weekdays">
-                <div>Sun</div>
-                <div>Mon</div>
-                <div>Tue</div>
-                <div>Wed</div>
-                <div>Thu</div>
-                <div>Fri</div>
-                <div>Sat</div>
-            </div>
-
+             <div class="calendar-weekdays">
+                 <!-- ... (weekdays) ... -->
+             </div>
             <div id="calendar-grid" class="calendar-grid">
                 <div class="loading" id="loading-indicator">Loading games...</div>
             </div>

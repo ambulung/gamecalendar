@@ -22,7 +22,7 @@
     --day-other-month-bg: #f0f0f0;
     --day-other-month-text: #aaaaaa;
     --day-has-game-border: #c4d7ff;
-    --day-highlight-border: #ffaa00; /* Highlight color */
+    --day-highlight-border: #ffaa00; /* Highlight color for search result */
     --day-highlight-shadow: rgba(255, 170, 0, 0.4); /* Highlight shadow color */
     --day-hover-shadow: rgba(0, 0, 0, 0.15);
     --overlay-bg: rgba(0, 0, 0, 0.65);
@@ -116,8 +116,42 @@ body {
 .api-credit {
     flex-shrink: 0; /* Prevent vertical shrinking */
 }
-.main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px 20px; /* Row gap, Column gap */
+}
 h1 { margin: 0; color: var(--text-color); font-size: 1.7em; flex-grow: 1; text-align: left; }
+
+/* --- Header Controls Grouping (Theme, NSFW) --- */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto; /* Push controls to the right */
+    flex-wrap: wrap;
+    justify-content: flex-end; /* Align to end when wrapped */
+}
+/* --- Theme Switcher Styles --- */
+.theme-switcher { display: flex; align-items: center; gap: 8px; }
+.theme-switcher span { font-size: 0.9em; color: var(--secondary-text-color); white-space: nowrap; }
+/* --- NSFW Filter Styles --- */
+.nsfw-filter { display: flex; align-items: center; gap: 8px; }
+.nsfw-filter span { font-size: 0.9em; color: var(--secondary-text-color); white-space: nowrap; }
+/* --- Generic Switch Styles (Used by both) --- */
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--switch-bg); transition: .4s; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--switch-slider-bg); transition: .4s; }
+input:checked + .slider { background-color: var(--switch-checked-bg); }
+input:focus + .slider { box-shadow: 0 0 1px var(--switch-checked-bg); }
+input:checked + .slider:before { transform: translateX(20px); }
+.slider.round { border-radius: 24px; }
+.slider.round:before { border-radius: 50%; }
+
 
 /* --- Search and Seek Styles --- */
 .search-seek-container { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; padding: 10px 0; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; }
@@ -146,7 +180,6 @@ h1 { margin: 0; color: var(--text-color); font-size: 1.7em; flex-grow: 1; text-a
 .calendar-header h2 { margin: 0; font-size: 1.4em; color: var(--text-color); white-space: nowrap; }
 .calendar-header button { padding: 7px 14px; background-color: var(--button-bg); color: white; border: none; border-radius: var(--radius-medium); cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; white-space: nowrap; }
 .calendar-header button:hover { background-color: var(--button-hover-bg); }
-
 
 /* --- Calendar Body (Weekdays + Grid) - Allow Vertical Scroll --- */
 .calendar-body {
@@ -198,9 +231,7 @@ h1 { margin: 0; color: var(--text-color); font-size: 1.7em; flex-grow: 1; text-a
     transform: scale(1.04);
     z-index: 15;
 }
-/* Optional: Adjust hover effect when highlighted */
 .calendar-day.search-highlight:hover { transform: scale(1.05); }
-/* Dark mode adjustments for highlight */
 body.dark-mode .calendar-day.search-highlight {
     border-color: var(--day-highlight-border, #ffcc66);
     box-shadow: 0 0 10px 3px var(--day-highlight-shadow, rgba(255, 204, 102, 0.4));
@@ -236,18 +267,6 @@ body.dark-mode .calendar-day.has-game.search-highlight { border-color: var(--day
 .game-list-item { padding: 3px 6px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; border-radius: var(--radius-small); color: var(--overlay-text-color); background-color: var(--list-item-bg); transition: background-color 0.2s ease; }
 .game-list-item:hover { background-color: var(--list-item-hover); }
 
-/* --- Theme Switcher --- */
-.theme-switcher { display: flex; align-items: center; gap: 8px; }
-.theme-switcher span { font-size: 0.9em; color: var(--secondary-text-color); white-space: nowrap; }
-.switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--switch-bg); transition: .4s; }
-.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--switch-slider-bg); transition: .4s; }
-input:checked + .slider { background-color: var(--switch-checked-bg); }
-input:focus + .slider { box-shadow: 0 0 1px var(--switch-checked-bg); }
-input:checked + .slider:before { transform: translateX(20px); }
-.slider.round { border-radius: 24px; }
-.slider.round:before { border-radius: 50%; }
 
 /* --- Loading Indicator (Position within calendar-body) --- */
 .loading { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; background-color: rgba(var(--container-bg-rgb), 0.8); font-size: 1.2em; color: var(--secondary-text-color); z-index: 20; border-radius: var(--radius-medium); transition: background-color 0.3s ease; }
@@ -295,9 +314,10 @@ input:checked + .slider:before { transform: translateX(20px); }
      .search-seek-container input[type="search"] { min-width: 0; }
 
     h1 { font-size: 1.6em; }
+    .header-controls { justify-content: flex-start; } /* Align toggles left */
     .calendar-header h2 { font-size: 1.3em; }
     .game-list { font-size: 0.75em; }
-    .loading { grid-column: 1 / -1; position: relative; /* Ensure loader fits flow */}
+    .loading { grid-column: 1 / -1; position: relative; }
 }
 
 /* --- Small Screens (Large Mobiles, Tablets Portrait) --- */
@@ -306,8 +326,10 @@ input:checked + .slider:before { transform: translateX(20px); }
     .calendar-container { padding: 15px; border-radius: var(--radius-medium); }
     h1 { font-size: 1.4em; text-align: center; }
     .subtitle { text-align: center; }
-    .main-header { justify-content: center; }
-    .theme-switcher { margin-top: 5px; }
+    .main-header { justify-content: center; } /* Center title and controls block */
+    .header-controls { width: 100%; justify-content: center; margin-left: 0; margin-top: 10px; } /* Center toggles */
+    .theme-switcher { margin-top: 0; } /* Reset margin */
+
     .search-seek-container { padding-bottom: 10px; }
     .seek-box { gap: 5px; }
     .seek-box label { width: 100%; margin-bottom: 5px; }
@@ -333,7 +355,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 
     h1 { font-size: 1.25em; }
     .subtitle { font-size: 0.8em; margin-bottom: 15px;}
-    .theme-switcher span { font-size: 0.8em; }
+    .header-controls span { font-size: 0.8em;}
     .switch { width: 40px; height: 22px; }
     .slider:before { width: 16px; height: 16px; left: 3px; bottom: 3px;}
     input:checked + .slider:before { transform: translateX(18px); }
@@ -360,7 +382,6 @@ input:checked + .slider:before { transform: translateX(20px); }
          border-color: var(--day-highlight-border, #ffcc66);
          box-shadow: 0 0 8px 2px var(--day-highlight-shadow, rgba(255, 204, 102, 0.3));
      }
-
 
     .day-number { position: absolute; top: 5px; right: 5px; font-size: 0.8em; font-weight: bold; color: var(--overlay-text-color); background-color: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: var(--radius-small); z-index: 2; margin: 0; min-width: auto; text-shadow: none; }
     .game-list { display: block !important; flex-grow: 1; position: relative; z-index: 2; padding: 0 6px; margin-top: 25px; overflow-y: auto; max-height: calc(100% - 30px); font-size: 0.75em; }
