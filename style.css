@@ -8,68 +8,74 @@
     --fade-duration: 0.7s;
     /* Fixed Cell Height for Desktop */
     --cell-fixed-height: 165px; /* Adjust as desired */
-    /* Colors */
-    --bg-color: #f0f0f0;
-    --container-bg: #ffffff;
-    --text-color: #333333;
-    --secondary-text-color: #666666;
-    --input-bg: #ffffff;
-    --input-border: #cccccc;
-    --input-text: #333333;
-    --input-focus-border: var(--button-bg);
-    --border-color: #e0e0e0;
-    --day-bg: #fdfdfd;
-    --day-other-month-bg: #f0f0f0;
-    --day-other-month-text: #aaaaaa;
-    --day-has-game-border: #c4d7ff;
-    --day-highlight-border: #ffaa00; /* Highlight color for search result */
-    --day-highlight-shadow: rgba(255, 170, 0, 0.4); /* Highlight shadow color */
-    --day-hover-shadow: rgba(0, 0, 0, 0.15);
-    --overlay-bg: rgba(0, 0, 0, 0.65);
-    --overlay-text-color: #ffffff;
-    --button-bg: #007bff;
-    --button-hover-bg: #0056b3;
-    --scrollbar-thumb: #cccccc;
-    --list-item-bg: rgba(0, 0, 0, 0.3);
-    --list-item-hover: rgba(0, 0, 0, 0.5);
-    --switch-bg: #ccc;
-    --switch-slider-bg: white;
-    --switch-checked-bg: #007bff;
-    /* RGB Version for Loader & Focus */
-    --container-bg-rgb: 255, 255, 255;
-    --button-bg-rgb: 0, 123, 255;
+
+    /* --- Colors (Palette Mapping for Light Mode) --- */
+    --bg-color: #F9F9F9; /* Very Light Gray */
+    --container-bg: #F9F9F9; /* Very Light Gray */
+    --text-color: #333333; /* Keep standard dark grey for readability on light bg */
+    --secondary-text-color: #666666; /* Keep standard grey */
+    --input-bg: #ffffff; /* Pure white for light input */
+    --input-border: #cccccc; /* Standard light grey border */
+    --input-text: #333333; /* Standard dark grey text */
+    --input-focus-border: #E94560; /* Accent pink */
+    --border-color: #e0e0e0; /* Standard light grey border */
+    --day-bg: #F9F9F9; /* Very Light Gray */
+    --day-other-month-bg: #eeeeee; /* Slightly darker grey */
+    --day-other-month-text: #aaaaaa; /* Light grey */
+    --day-has-game-border: #E94560; /* Accent pink */
+    --day-highlight-border: #E94560; /* Accent pink */
+    --day-highlight-shadow: rgba(233, 69, 96, 0.4); /* Shadow from accent pink */
+    --day-hover-shadow: rgba(0, 0, 0, 0.15); /* Shadow from standard dark */
+    --overlay-bg: rgba(0, 0, 0, 0.65); /* Dark overlay over images */
+    --overlay-text-color: #ffffff; /* White text over dark overlay */
+    --button-bg: #E94560; /* Accent pink */
+    --button-hover-bg: #d03a53; /* Darker accent pink */
+    --scrollbar-thumb: #cccccc; /* Standard grey scrollbar */
+    --list-item-bg: rgba(0, 0, 0, 0.3); /* Semi-transparent dark */
+    --list-item-hover: rgba(0, 0, 0, 0.5); /* Darker semi-transparent dark */
+    --switch-bg: #cccccc; /* Light grey switch track */
+    --switch-slider-bg: white; /* White switch thumb */
+    --switch-checked-bg: #E94560; /* Accent pink when checked */
+
+    /* RGB Version for Loader & Focus (Match palette colors) */
+    --container-bg-rgb: 249, 249, 249; /* RGB for #F9F9F9 */
+    --button-bg-rgb: 233, 69, 96; /* RGB for #E94560 */
 }
 
 body.dark-mode {
-    --bg-color: #1f1f1f;
-    --container-bg: #2d2d2d;
-    --text-color: #e0e0e0;
-    --secondary-text-color: #aaaaaa;
-    --input-bg: #3a3a3a;
-    --input-border: #555555;
-    --input-text: #e0e0e0;
-    --input-focus-border: var(--switch-checked-bg);
-    --border-color: #444444;
-    --day-bg: #353535;
-    --day-other-month-bg: #2a2a2a;
-    --day-other-month-text: #777777;
-    --day-has-game-border: #505f7a;
-    --day-highlight-border: #ffcc66; /* Lighter highlight for dark mode */
-    --day-highlight-shadow: rgba(255, 204, 102, 0.3); /* Lighter highlight shadow */
-    --day-hover-shadow: rgba(255, 255, 255, 0.1);
-    --overlay-bg: rgba(0, 0, 0, 0.6);
-    --overlay-text-color: #ffffff;
-    --button-bg: #0056b3;
-    --button-hover-bg: #004494;
-    --scrollbar-thumb: #555555;
-    --list-item-bg: rgba(255, 255, 255, 0.15);
-    --list-item-hover: rgba(255, 255, 255, 0.3);
-    --switch-bg: #555;
-    --switch-slider-bg: #ccc;
-    --switch-checked-bg: #007bff;
-    --container-bg-rgb: 45, 45, 45;
-    --button-bg-rgb: 0, 86, 179;
+    /* --- Colors (Palette Mapping for Dark Mode) --- */
+    --bg-color: #1A1A2E; /* Very Dark Blue/Purple */
+    --container-bg: #16213E; /* Dark Blue */
+    --text-color: #F9F9F9; /* Very Light Gray (readable) */
+    --secondary-text-color: #AAAAAA; /* Slightly darker light grey */
+    --input-bg: #0F3460; /* Medium-Dark Blue */
+    --input-border: #444444; /* Dark grey border */
+    --input-text: #F9F9F9; /* Very Light Gray */
+    --input-focus-border: #E94560; /* Accent pink */
+    --border-color: #444444; /* Dark grey border */
+    --day-bg: #16213E; /* Dark Blue */
+    --day-other-month-bg: #1A1A2E; /* Very Dark Blue/Purple */
+    --day-other-month-text: #777777; /* Dark grey */
+    --day-has-game-border: #E94560; /* Accent pink */
+    --day-highlight-border: #E94560; /* Accent pink */
+    --day-highlight-shadow: rgba(233, 69, 96, 0.5); /* Shadow from accent pink */
+    --day-hover-shadow: rgba(255, 255, 255, 0.1); /* Shadow from light */
+    --overlay-bg: rgba(0, 0, 0, 0.6); /* Dark overlay (still works well in dark mode) */
+    --overlay-text-color: #ffffff; /* White text */
+    --button-bg: #E94560; /* Accent pink */
+    --button-hover-bg: #d03a53; /* Darker accent pink */
+    --scrollbar-thumb: #555555; /* Dark grey scrollbar */
+    --list-item-bg: rgba(255, 255, 255, 0.15); /* Semi-transparent light */
+    --list-item-hover: rgba(255, 255, 255, 0.3); /* Darker semi-transparent light */
+    --switch-bg: #555555; /* Dark grey switch track */
+    --switch-slider-bg: #cccccc; /* Light grey switch thumb */
+    --switch-checked-bg: #E94560; /* Accent pink when checked */
+
+    /* RGB Version for Loader & Focus (Match palette colors) */
+    --container-bg-rgb: 22, 33, 62; /* RGB for #16213E */
+    --button-bg-rgb: 233, 69, 96; /* RGB for #E94560 */
 }
+
 
 /* --- General Styles --- */
 html, body {
@@ -82,7 +88,7 @@ body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: flex-start; /* Align container top */
     background-color: var(--bg-color);
     color: var(--text-color);
     padding: 20px 15px;
@@ -104,8 +110,8 @@ body {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 40px);
-    max-height: calc(100vh - 40px);
+    height: calc(100vh - 40px); /* Subtract body padding */
+    max-height: calc(100vh - 40px); /* Ensure it doesn't exceed viewport */
 }
 
 /* --- Header Elements --- */
@@ -144,13 +150,11 @@ h1 { margin: 0; color: var(--text-color); font-size: 1.7em; flex-grow: 1; text-a
 /* --- Generic Switch Styles (Used by both) --- */
 .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--switch-bg); transition: .4s; }
-.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--switch-slider-bg); transition: .4s; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--switch-bg); transition: .4s; border-radius: 24px; } /* Added border-radius here */
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--switch-slider-bg); transition: .4s; border-radius: 50%; } /* Added border-radius here */
 input:checked + .slider { background-color: var(--switch-checked-bg); }
 input:focus + .slider { box-shadow: 0 0 1px var(--switch-checked-bg); }
 input:checked + .slider:before { transform: translateX(20px); }
-.slider.round { border-radius: 24px; }
-.slider.round:before { border-radius: 50%; }
 
 
 /* --- Search and Seek Styles --- */
@@ -226,16 +230,17 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 /* --- Highlight Style for Search Result --- */
 .calendar-day.search-highlight {
-    border-color: var(--day-highlight-border, #ffaa00);
-    box-shadow: 0 0 10px 3px var(--day-highlight-shadow, rgba(255, 170, 0, 0.5));
+    border-color: var(--day-highlight-border, #E94560); /* Ensure palette color is used */
+    box-shadow: 0 0 10px 3px var(--day-highlight-shadow, rgba(233, 69, 96, 0.4)); /* Ensure palette color is used */
     transform: scale(1.04);
     z-index: 15;
 }
-.calendar-day.search-highlight:hover { transform: scale(1.05); }
+.calendar-day.search-highlight:hover { transform: scale(1.05); } /* Slightly larger hover */
 body.dark-mode .calendar-day.search-highlight {
-    border-color: var(--day-highlight-border, #ffcc66);
-    box-shadow: 0 0 10px 3px var(--day-highlight-shadow, rgba(255, 204, 102, 0.4));
+    border-color: var(--day-highlight-border, #E94560); /* Use same accent color in dark mode */
+    box-shadow: 0 0 10px 3px var(--day-highlight-shadow, rgba(233, 69, 96, 0.5)); /* Adjust shadow opacity for dark mode if needed */
 }
+
 
 /* Day Number */
 .day-number { font-size: 0.85em; font-weight: bold; color: var(--secondary-text-color); text-align: right; margin-bottom: 4px; padding: 0 5px; position: relative; z-index: 2; text-shadow: 0 0 4px rgba(0,0,0,0.6); }
@@ -248,8 +253,8 @@ body.dark-mode .calendar-day.search-highlight {
 .calendar-day.other-month .game-list { display: none; }
 .calendar-day.has-game { border-color: var(--day-has-game-border); } /* Default border */
 /* Ensure highlighted border overrides default has-game border */
-.calendar-day.has-game.search-highlight { border-color: var(--day-highlight-border, #ffaa00); }
-body.dark-mode .calendar-day.has-game.search-highlight { border-color: var(--day-highlight-border, #ffcc66); }
+.calendar-day.has-game.search-highlight { border-color: var(--day-highlight-border, #E94560); }
+body.dark-mode .calendar-day.has-game.search-highlight { border-color: var(--day-highlight-border, #E94560); }
 
 
 /* --- Game List Styling (Adjust max-height for fixed parent) --- */
@@ -275,6 +280,7 @@ body.dark-mode .calendar-day.has-game.search-highlight { border-color: var(--day
 .api-credit { margin-top: 15px; font-size: 0.8em; color: var(--secondary-text-color); }
 .api-credit a { color: var(--button-bg); text-decoration: none; }
 .api-credit a:hover { text-decoration: underline; }
+
 
 /* =================================== */
 /* === Responsive Adjustments ======== */
@@ -308,13 +314,19 @@ body.dark-mode .calendar-day.has-game.search-highlight { border-color: var(--day
          /* Revert max-height calc for non-fixed parent */
          max-height: calc(100% - 30px);
      }
-     .search-seek-container { flex-direction: column; align-items: flex-start; }
-     .search-box, .seek-box { width: 100%; justify-content: flex-start; }
+     h1 { font-size: 1.6em; }
+     .main-header {
+         gap: 10px; /* Reduced gap */
+     }
+     .header-controls {
+         justify-content: flex-start; /* Align toggles left */
+         margin-left: 0; /* Remove auto margin */
+     }
+     .search-seek-container { flex-direction: column; align-items: flex-start; gap: 10px; } /* Reduce gap */
+     .search-box, .seek-box { width: 100%; justify-content: flex-start; gap: 5px; } /* Reduce gap */
      .search-input-wrapper { width: auto; flex-grow: 1; }
      .search-seek-container input[type="search"] { min-width: 0; }
 
-    h1 { font-size: 1.6em; }
-    .header-controls { justify-content: flex-start; } /* Align toggles left */
     .calendar-header h2 { font-size: 1.3em; }
     .game-list { font-size: 0.75em; }
     .loading { grid-column: 1 / -1; position: relative; }
@@ -330,7 +342,7 @@ body.dark-mode .calendar-day.has-game.search-highlight { border-color: var(--day
     .header-controls { width: 100%; justify-content: center; margin-left: 0; margin-top: 10px; } /* Center toggles */
     .theme-switcher { margin-top: 0; } /* Reset margin */
 
-    .search-seek-container { padding-bottom: 10px; }
+    .search-seek-container { padding-bottom: 10px; gap: 10px; }
     .seek-box { gap: 5px; }
     .seek-box label { width: 100%; margin-bottom: 5px; }
     .seek-box select { flex-grow: 1; }
@@ -374,14 +386,15 @@ body.dark-mode .calendar-day.has-game.search-highlight { border-color: var(--day
     .calendar-day.has-game::before, .calendar-day::after { display: block; }
     /* Ensure highlight shows in list view */
      .calendar-day.search-highlight {
-         border-color: var(--day-highlight-border, #ffaa00);
-         box-shadow: 0 0 8px 2px var(--day-highlight-shadow, rgba(255, 170, 0, 0.4)); /* Adjusted shadow for list */
+         border-color: var(--day-highlight-border, #E94560);
+         box-shadow: 0 0 8px 2px var(--day-highlight-shadow, rgba(233, 69, 96, 0.4)); /* Adjusted shadow for list */
          transform: none; /* No scale needed in list */
      }
      body.dark-mode .calendar-day.search-highlight {
-         border-color: var(--day-highlight-border, #ffcc66);
-         box-shadow: 0 0 8px 2px var(--day-highlight-shadow, rgba(255, 204, 102, 0.3));
+         border-color: var(--day-highlight-border, #E94560);
+         box-shadow: 0 0 8px 2px var(--day-highlight-shadow, rgba(233, 69, 96, 0.3));
      }
+
 
     .day-number { position: absolute; top: 5px; right: 5px; font-size: 0.8em; font-weight: bold; color: var(--overlay-text-color); background-color: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: var(--radius-small); z-index: 2; margin: 0; min-width: auto; text-shadow: none; }
     .game-list { display: block !important; flex-grow: 1; position: relative; z-index: 2; padding: 0 6px; margin-top: 25px; overflow-y: auto; max-height: calc(100% - 30px); font-size: 0.75em; }
