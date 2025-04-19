@@ -10,36 +10,36 @@
     --cell-fixed-height: 165px; /* Adjust as desired */
 
     /* --- Colors (Palette Mapping for LIGHT Mode) --- */
-    --bg-color: #F9F9F9; /* Very Light Gray */
-    --container-bg: #F9F9F9; /* Very Light Gray */
-    --text-color: #333333; /* Standard dark grey for readability */
-    --secondary-text-color: #666666; /* Standard medium grey */
-    --input-bg: #ffffff; /* Pure white */
-    --input-border: #cccccc; /* Standard light grey */
-    --input-text: #333333; /* Standard dark grey */
-    --input-focus-border: #007bff; /* A standard blue for focus in light mode */
-    --border-color: #e0e0e0; /* Standard light grey */
-    --day-bg: #ffffff; /* White day background */
-    --day-other-month-bg: #eeeeee; /* Slightly darker grey */
-    --day-other-month-text: #aaaaaa; /* Light grey */
-    --day-has-game-border: #cccccc; /* Standard grey border for days with games */
-    --day-highlight-border: #E94560; /* Accent pink for highlight */
-    --day-highlight-shadow: rgba(233, 69, 96, 0.4); /* Shadow from accent pink */
-    --day-hover-shadow: rgba(0, 0, 0, 0.15); /* Shadow from standard dark */
-    --overlay-bg: rgba(0, 0, 0, 0.65); /* Dark overlay over images */
-    --overlay-text-color: #ffffff; /* White text over dark overlay */
+    --bg-color: #F9F9F9;
+    --container-bg: #F9F9F9;
+    --text-color: #333333;
+    --secondary-text-color: #666666;
+    --input-bg: #ffffff;
+    --input-border: #cccccc;
+    --input-text: #333333;
+    --input-focus-border: #007bff; /* Standard blue focus */
+    --border-color: #e0e0e0;
+    --day-bg: #ffffff;
+    --day-other-month-bg: #eeeeee;
+    --day-other-month-text: #aaaaaa;
+    --day-has-game-border: #cccccc;
+    --day-highlight-border: #E94560; /* Pink highlight */
+    --day-highlight-shadow: rgba(233, 69, 96, 0.4); /* Pink shadow */
+    --day-hover-shadow: rgba(0, 0, 0, 0.15);
+    --overlay-bg: rgba(0, 0, 0, 0.65);
+    --overlay-text-color: #ffffff;
     --button-bg: #007bff; /* Standard blue button */
-    --button-hover-bg: #0056b3; /* Darker standard blue */
-    --scrollbar-thumb: #cccccc; /* Standard grey scrollbar */
-    --list-item-bg: rgba(0, 0, 0, 0.3); /* Semi-transparent dark */
-    --list-item-hover: rgba(0, 0, 0, 0.5); /* Darker semi-transparent dark */
-    --switch-bg: #cccccc; /* Light grey switch track */
-    --switch-slider-bg: white; /* White switch thumb */
-    --switch-checked-bg: #007bff; /* Standard blue when checked */
+    --button-hover-bg: #0056b3;
+    --scrollbar-thumb: #cccccc;
+    --list-item-bg: rgba(0, 0, 0, 0.3);
+    --list-item-hover: rgba(0, 0, 0, 0.5);
+    --switch-bg: #cccccc;
+    --switch-slider-bg: white;
+    --switch-checked-bg: #007bff;
 
-    /* RGB Version for Loader & Focus (Match palette colors or standards) */
-    --container-bg-rgb: 249, 249, 249; /* RGB for #F9F9F9 */
-    --button-bg-rgb: 0, 123, 255; /* RGB for #007bff */
+    /* RGB Version for Loader & Focus */
+    --container-bg-rgb: 249, 249, 249;
+    --button-bg-rgb: 0, 123, 255;
 }
 
 body.dark-mode {
@@ -47,104 +47,49 @@ body.dark-mode {
     --bg-color: #0D0D0D; /* Palette: Background */
     --container-bg: #0D0D0D; /* Palette: Background */
     --text-color: #FFFFFF; /* Palette: Primary Text */
-    --secondary-text-color: #AAAAAA; /* A readable grey for secondary text in dark mode */
-    --input-bg: #16213E; /* A dark shade for input background */
-    --input-border: #444444; /* Dark grey border */
+    --secondary-text-color: #AAAAAA;
+    --input-bg: #16213E; /* Dark Blue */
+    --input-border: #444444;
     --input-text: #FFFFFF; /* Palette: Primary Text */
     --input-focus-border: #1E90FF; /* Palette: Accent 2 (Electric Blue) */
-    --border-color: #444444; /* Dark grey border */
-    --day-bg: #16213E; /* Dark Blue (slightly off black for contrast) */
+    --border-color: #444444;
+    --day-bg: #16213E; /* Dark Blue */
     --day-other-month-bg: #0D0D0D; /* Palette: Background */
-    --day-other-month-text: #777777; /* Darker grey */
+    --day-other-month-text: #777777;
     --day-has-game-border: #00FF85; /* Palette: Accent 1 (Neon Green) */
     --day-highlight-border: #1E90FF; /* Palette: Accent 2 (Electric Blue) */
     --day-highlight-shadow: rgba(30, 144, 255, 0.5); /* Shadow from Electric Blue */
-    --day-hover-shadow: rgba(0, 0, 0, 0.5); /* Dark shadow (more visible on dark bg) */
-    --overlay-bg: rgba(0, 0, 0, 0.7); /* Dark overlay over images */
-    --overlay-text-color: #FFFFFF; /* White text over dark overlay */
+    --day-hover-shadow: rgba(0, 0, 0, 0.5);
+    --overlay-bg: rgba(0, 0, 0, 0.7); /* Keep dark overlay */
+    --overlay-text-color: #FFFFFF; /* White text */
     --button-bg: #00FF85; /* Palette: Accent 1 (Neon Green) */
     --button-hover-bg: #FF0099; /* Palette: Hover Effects (Vivid Pink) */
-    --scrollbar-thumb: #0F3460; /* A dark blue for scrollbar thumb */
-    --list-item-bg: rgba(255, 255, 255, 0.1); /* Subtle light semi-transparent */
-    --list-item-hover: rgba(255, 255, 255, 0.2); /* Slightly more visible light semi-transparent */
-    --switch-bg: #444444; /* Dark grey switch track */
-    --switch-slider-bg: #cccccc; /* Light grey switch thumb */
+    --scrollbar-thumb: #0F3460; /* Dark Blue */
+    --list-item-bg: rgba(255, 255, 255, 0.1); /* Subtle light */
+    --list-item-hover: rgba(255, 255, 255, 0.2);
+    --switch-bg: #444444; /* Dark grey track */
+    --switch-slider-bg: #cccccc; /* Light grey thumb */
     --switch-checked-bg: #1E90FF; /* Palette: Accent 2 (Electric Blue) when checked */
 
-    /* RGB Version for Loader & Focus (Match palette colors) */
-    --container-bg-rgb: 13, 13, 13; /* RGB for #0D0D0D */
-    --button-bg-rgb: 0, 255, 133; /* RGB for #00FF85 */
+    /* RGB Version for Loader & Focus */
+    --container-bg-rgb: 13, 13, 13;
+    --button-bg-rgb: 0, 255, 133; /* RGB for Neon Green */
 }
 
 
 /* --- General Styles --- */
-html, body {
-    height: 100%;
-    margin: 0;
-    /* overflow: hidden; Let responsive styles handle this */
-}
-
-body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start; /* Align container top */
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    padding: 20px 15px;
-    box-sizing: border-box;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    overflow-y: hidden; /* Hide body scroll on large screens by default */
-}
-
-/* Make Container take full viewport height */
-.calendar-container {
-    background-color: var(--container-bg);
-    padding: 20px;
-    border-radius: var(--radius-large);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 1200px;
-    text-align: center;
-    transition: background-color 0.3s ease;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 40px); /* Subtract body padding */
-    max-height: calc(100vh - 40px); /* Ensure it doesn't exceed viewport */
-}
+html, body { height: 100%; margin: 0; }
+body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; display: flex; justify-content: center; align-items: flex-start; background-color: var(--bg-color); color: var(--text-color); padding: 20px 15px; box-sizing: border-box; transition: background-color 0.3s ease, color 0.3s ease; overflow-y: hidden; /* Hide body scroll on large screens by default */ }
+.calendar-container { background-color: var(--container-bg); padding: 20px; border-radius: var(--radius-large); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 100%; max-width: 1200px; text-align: center; transition: background-color 0.3s ease; box-sizing: border-box; display: flex; flex-direction: column; height: calc(100vh - 40px); max-height: calc(100vh - 40px); }
 
 /* --- Header Elements --- */
-.main-header,
-.search-seek-container,
-.subtitle,
-.calendar-header,
-.api-credit {
-    flex-shrink: 0; /* Prevent vertical shrinking */
-}
-.main-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-    gap: 10px 20px; /* Row gap, Column gap */
-}
+.main-header, .search-seek-container, .subtitle, .calendar-header, .api-credit { flex-shrink: 0; }
+.main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px 20px; }
 h1 { margin: 0; color: var(--text-color); font-size: 1.7em; flex-grow: 1; text-align: left; }
-
-/* --- Header Controls Grouping (Theme, NSFW) --- */
-.header-controls {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-left: auto; /* Push controls to the right */
-    flex-wrap: wrap;
-    justify-content: flex-end; /* Align to end when wrapped */
-}
-/* --- Theme Switcher Styles --- */
+.header-controls { display: flex; align-items: center; gap: 15px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
 .theme-switcher { display: flex; align-items: center; gap: 8px; }
 .theme-switcher span { font-size: 0.9em; color: var(--secondary-text-color); white-space: nowrap; }
-/* --- Generic Switch Styles (Used by both) --- */
+/* --- Generic Switch Styles --- */
 .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--switch-bg); transition: .4s; border-radius: 24px; }
@@ -153,48 +98,41 @@ input:checked + .slider { background-color: var(--switch-checked-bg); }
 input:focus + .slider { box-shadow: 0 0 1px var(--switch-checked-bg); }
 input:checked + .slider:before { transform: translateX(20px); }
 
-
 /* --- Search and Seek Styles --- */
 .search-seek-container { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; padding: 10px 0; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; }
 .search-box, .seek-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .search-seek-container label { font-size: 0.9em; color: var(--secondary-text-color); margin-bottom: 0; }
 .search-input-wrapper { position: relative; flex-grow: 1; }
 .search-seek-container input[type="search"] { width: 100%; box-sizing: border-box; min-width: 150px; padding: 6px 10px; font-size: 0.9em; border: 1px solid var(--input-border); border-radius: var(--radius-small); background-color: var(--input-bg); color: var(--input-text); transition: border-color 0.2s ease; }
-/* --- Search Suggestions --- */
 .suggestions-container { display: none; position: absolute; top: 100%; left: 0; right: 0; background-color: var(--container-bg); border: 1px solid var(--input-border); border-top: none; border-radius: 0 0 var(--radius-small) var(--radius-small); max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: left; }
 .suggestion-item { padding: 8px 12px; font-size: 0.85em; color: var(--text-color); cursor: pointer; border-bottom: 1px solid var(--border-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .suggestion-item:last-child { border-bottom: none; }
 .suggestion-item:hover { background-color: rgba(var(--button-bg-rgb), 0.1); }
 .suggestion-item small { font-size: 0.9em; color: var(--secondary-text-color); margin-left: 5px; }
-/* --- Other Search/Seek Inputs --- */
 .search-seek-container input[type="number"], .search-seek-container select { padding: 6px 10px; font-size: 0.9em; border: 1px solid var(--input-border); border-radius: var(--radius-small); background-color: var(--input-bg); color: var(--input-text); transition: border-color 0.2s ease; }
 .search-seek-container input[type="number"] { width: 70px; -moz-appearance: textfield; }
 .search-seek-container input[type="number"]::-webkit-outer-spin-button, .search-seek-container input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .search-seek-container select { min-width: 120px; }
 .search-seek-container input:focus, .search-seek-container select:focus { outline: none; border-color: var(--input-focus-border); box-shadow: 0 0 0 2px rgba(var(--button-bg-rgb), 0.2); }
-.search-seek-container button { padding: 6px 12px; background-color: var(--button-bg); color: white; border: none; border-radius: var(--radius-small); cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; }
-.search-seek-container button:hover { background-color: var(--button-hover-bg); }
+.search-seek-container button { padding: 6px 12px; background-color: var(--button-bg); color: var(--text-color); /* Use text color for contrast on neon green */ border: none; border-radius: var(--radius-small); cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; }
+.search-seek-container button:hover { background-color: var(--button-hover-bg); color: var(--overlay-text-color); /* Change text on hover if needed */ }
+body.light-mode .search-seek-container button { color: white; } /* Ensure white text for light mode blue button */
+body.light-mode .search-seek-container button:hover { color: white; }
 
 /* --- Subtitle & Calendar Header --- */
 .subtitle { font-size: 0.9em; color: var(--secondary-text-color); margin-top: 0; margin-bottom: 15px; text-align: left; width: 100%; }
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; }
 .calendar-header h2 { margin: 0; font-size: 1.4em; color: var(--text-color); white-space: nowrap; }
-.calendar-header button { padding: 7px 14px; background-color: var(--button-bg); color: white; border: none; border-radius: var(--radius-medium); cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; white-space: nowrap; }
-.calendar-header button:hover { background-color: var(--button-hover-bg); }
+.calendar-header button { padding: 7px 14px; background-color: var(--button-bg); color: var(--text-color); border: none; border-radius: var(--radius-medium); cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; white-space: nowrap; }
+.calendar-header button:hover { background-color: var(--button-hover-bg); color: var(--overlay-text-color); }
+body.light-mode .calendar-header button { color: white; } /* Ensure white text for light mode blue button */
+body.light-mode .calendar-header button:hover { color: white; }
 
 /* --- Calendar Body (Weekdays + Grid) - Allow Vertical Scroll --- */
-.calendar-body {
-    flex-grow: 1;
-    overflow-y: auto; /* *** ALLOW INTERNAL SCROLL *** */
-    overflow-x: hidden;
-    position: relative;
-    padding-right: 5px; /* Add padding for scrollbar */
-    margin-right: -5px; /* Counteract padding */
-}
+.calendar-body { flex-grow: 1; overflow-y: auto; overflow-x: hidden; position: relative; padding-right: 5px; margin-right: -5px; }
 .calendar-body::-webkit-scrollbar { width: 8px; }
 .calendar-body::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb); border-radius: 4px; }
 .calendar-body::-webkit-scrollbar-track { background: transparent; }
-
 
 /* --- Calendar Grid (Default View) --- */
 .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 8px; flex-shrink: 0; }
@@ -202,22 +140,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .calendar-weekdays div { font-weight: bold; text-align: center; padding: 8px 2px; color: var(--secondary-text-color); font-size: 0.85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* --- Calendar Day Styling (Default - FIXED HEIGHT) --- */
-.calendar-day {
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-medium);
-    height: var(--cell-fixed-height); /* *** USE FIXED HEIGHT *** */
-    position: relative;
-    background-color: var(--day-bg);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    padding: 5px;
-    box-sizing: border-box;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, border-color 0.3s ease, height 0.2s ease;
-}
+.calendar-day { border: 1px solid var(--border-color); border-radius: var(--radius-medium); height: var(--cell-fixed-height); position: relative; background-color: var(--day-bg); background-size: cover; background-position: center; background-repeat: no-repeat; overflow: hidden; display: flex; flex-direction: column; padding: 5px; box-sizing: border-box; transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, border-color 0.3s ease, height 0.2s ease; }
 .calendar-day:hover { transform: scale(1.02); box-shadow: 0 3px 10px var(--day-hover-shadow); z-index: 10; }
 
 /* Dark Overlay & Fade Layer */
@@ -226,18 +149,8 @@ input:checked + .slider:before { transform: translateX(20px); }
 .calendar-day.is-fading::after { opacity: 1; }
 
 /* --- Highlight Style for Search Result --- */
-.calendar-day.search-highlight {
-    border-color: var(--day-highlight-border, #E94560);
-    box-shadow: 0 0 10px 3px var(--day-highlight-shadow, rgba(233, 69, 96, 0.4));
-    transform: scale(1.04);
-    z-index: 15;
-}
+.calendar-day.search-highlight { border-color: var(--day-highlight-border); box-shadow: 0 0 10px 3px var(--day-highlight-shadow); transform: scale(1.04); z-index: 15; }
 .calendar-day.search-highlight:hover { transform: scale(1.05); }
-body.dark-mode .calendar-day.search-highlight {
-    border-color: var(--day-highlight-border, #1E90FF); /* Use Electric Blue for highlight in dark mode */
-    box-shadow: 0 0 10px 3px var(--day-highlight-shadow, rgba(30, 144, 255, 0.5)); /* Shadow from Electric Blue */
-}
-
 
 /* Day Number */
 .day-number { font-size: 0.85em; font-weight: bold; color: var(--secondary-text-color); text-align: right; margin-bottom: 4px; padding: 0 5px; position: relative; z-index: 2; text-shadow: 0 0 4px rgba(0,0,0,0.6); }
@@ -253,24 +166,28 @@ body.dark-mode .calendar-day.search-highlight {
 /* Ensure highlighted border overrides default */
 .calendar-day.has-game.search-highlight { border-color: var(--day-highlight-border); }
 
-
 /* --- Game List Styling (Adjust max-height for fixed parent) --- */
-.game-list {
-    list-style: none; padding: 0 6px; margin: 0; font-size: 0.78em;
-    overflow-y: auto; /* INTERNAL SCROLLBAR FOR LIST */
-    flex-grow: 1; text-align: left;
-    /* Adjust max-height calculation based on FIXED parent height */
-    max-height: calc(var(--cell-fixed-height) - 2.5em);
-    position: relative; z-index: 2;
-}
+.game-list { list-style: none; padding: 0 6px; margin: 0; font-size: 0.78em; overflow-y: auto; flex-grow: 1; text-align: left; max-height: calc(var(--cell-fixed-height) - 2.5em); position: relative; z-index: 2; }
 .game-list::-webkit-scrollbar { width: 5px; }
 .game-list::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb); border-radius: 3px; }
 .game-list::-webkit-scrollbar-track { background: transparent; }
 .game-list-item { padding: 3px 6px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; border-radius: var(--radius-small); color: var(--overlay-text-color); background-color: var(--list-item-bg); transition: background-color 0.2s ease; }
 .game-list-item:hover { background-color: var(--list-item-hover); }
+/* Make clickable list items visually distinct */
+.game-list-item[style*="cursor: pointer"] {
+    text-decoration: underline dotted; /* Add underline for clickable */
+    text-decoration-color: var(--overlay-text-color);
+}
+.game-list-item[style*="cursor: pointer"]:hover {
+     color: var(--button-hover-bg); /* Change text color on hover for links */
+     text-decoration-color: var(--button-hover-bg);
+}
+body.light-mode .game-list-item[style*="cursor: pointer"]:hover {
+     color: var(--button-bg); /* Light mode link hover */
+     text-decoration-color: var(--button-bg);
+}
 
-
-/* --- Loading Indicator (Position within calendar-body) --- */
+/* --- Loading Indicator --- */
 .loading { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; background-color: rgba(var(--container-bg-rgb), 0.8); font-size: 1.2em; color: var(--secondary-text-color); z-index: 20; border-radius: var(--radius-medium); transition: background-color 0.3s ease; }
 
 /* --- API Credit --- */
@@ -278,67 +195,37 @@ body.dark-mode .calendar-day.search-highlight {
 .api-credit a { color: var(--button-bg); text-decoration: none; }
 .api-credit a:hover { text-decoration: underline; }
 
-
 /* =================================== */
 /* === Responsive Adjustments ======== */
 /* =================================== */
 
-/* --- Medium Screens (Tablets, smaller laptops) --- */
 @media (max-width: 992px) {
-    html, body {
-        height: auto;
-        overflow: auto; /* *** ALLOW body scroll *** */
-    }
-    body { overflow-y: auto; } /* Ensure */
-    .calendar-container {
-        height: auto; /* Revert height */
-        max-height: none;
-        display: block; /* Revert display */
-        padding: 20px;
-        max-width: 95%;
-    }
-     .calendar-body {
-        overflow: visible; /* *** DISABLE internal scroll *** */
-        flex-grow: 0;
-        padding-right: 0;
-        margin-right: 0;
-    }
-    .calendar-day {
-        height: auto; /* *** Revert fixed height *** */
-        min-height: 145px;
-    }
-     .game-list {
-         /* Revert max-height calc for non-fixed parent */
-         max-height: calc(100% - 30px);
-     }
-     h1 { font-size: 1.6em; }
-     .main-header {
-         gap: 10px; /* Reduced gap */
-     }
-     .header-controls {
-         justify-content: flex-start; /* Align toggles left */
-         margin-left: 0; /* Remove auto margin */
-     }
-     .search-seek-container { flex-direction: column; align-items: flex-start; gap: 10px; } /* Reduce gap */
-     .search-box, .seek-box { width: 100%; justify-content: flex-start; gap: 5px; } /* Reduce gap */
-     .search-input-wrapper { width: auto; flex-grow: 1; }
-     .search-seek-container input[type="search"] { min-width: 0; }
-
+    html, body { height: auto; overflow: auto; }
+    body { overflow-y: auto; }
+    .calendar-container { height: auto; max-height: none; display: block; padding: 20px; max-width: 95%; }
+    .calendar-body { overflow: visible; flex-grow: 0; padding-right: 0; margin-right: 0; }
+    .calendar-day { height: auto; min-height: 145px; }
+    .game-list { max-height: calc(100% - 30px); }
+    h1 { font-size: 1.6em; }
+    .main-header { gap: 10px; }
+    .header-controls { justify-content: flex-start; margin-left: 0; }
+    .search-seek-container { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .search-box, .seek-box { width: 100%; justify-content: flex-start; gap: 5px; }
+    .search-input-wrapper { width: auto; flex-grow: 1; }
+    .search-seek-container input[type="search"] { min-width: 0; }
     .calendar-header h2 { font-size: 1.3em; }
     .game-list { font-size: 0.75em; }
     .loading { grid-column: 1 / -1; position: relative; }
 }
 
-/* --- Small Screens (Large Mobiles, Tablets Portrait) --- */
 @media (max-width: 768px) {
-     body { padding: 15px 10px; }
+    body { padding: 15px 10px; }
     .calendar-container { padding: 15px; border-radius: var(--radius-medium); }
     h1 { font-size: 1.4em; text-align: center; }
     .subtitle { text-align: center; }
-    .main-header { justify-content: center; } /* Center title and controls block */
-    .header-controls { width: 100%; justify-content: center; margin-left: 0; margin-top: 10px; } /* Center toggles */
-    .theme-switcher { margin-top: 0; } /* Reset margin */
-
+    .main-header { justify-content: center; }
+    .header-controls { width: 100%; justify-content: center; margin-left: 0; margin-top: 10px; }
+    .theme-switcher { margin-top: 0; }
     .search-seek-container { padding-bottom: 10px; gap: 10px; }
     .seek-box { gap: 5px; }
     .seek-box label { width: 100%; margin-bottom: 5px; }
@@ -356,12 +243,10 @@ body.dark-mode .calendar-day.search-highlight {
     .loading { border-radius: var(--radius-small); }
 }
 
-/* --- LIST VIEW with IMAGES Breakpoint (Mobile Phones) --- */
 @media (max-width: 600px) {
     html, body { height: auto; overflow: auto; }
     .calendar-container { height: auto; max-height: none; display: block; padding: 10px; }
     .calendar-body { overflow: visible; flex-grow: 0; }
-
     h1 { font-size: 1.25em; }
     .subtitle { font-size: 0.8em; margin-bottom: 15px;}
     .header-controls span { font-size: 0.8em;}
@@ -373,28 +258,18 @@ body.dark-mode .calendar-day.search-highlight {
     .seek-box { margin-top: 10px; }
     .calendar-header h2 { font-size: 1.1em; margin-bottom: 8px;}
     .calendar-header button { font-size: 0.8em; padding: 5px 10px; }
-
     .calendar-weekdays { display: none; }
     .calendar-grid { display: flex; flex-direction: column; gap: 10px; min-height: auto; }
-
     .calendar-day { display: none; height: auto; min-height: 140px; width: 100%; flex-direction: column; padding: 5px; border-radius: var(--radius-medium); position: relative; overflow: hidden; background-size: cover; background-position: center; border: 1px solid var(--border-color); transform: none; box-shadow: none; }
     .calendar-day.has-game { display: flex; }
     .calendar-day:hover { transform: none; box-shadow: none; }
     .calendar-day.has-game::before, .calendar-day::after { display: block; }
-    /* Ensure highlight shows in list view */
-     .calendar-day.search-highlight {
-         border-color: var(--day-highlight-border, #1E90FF); /* Use Electric Blue */
-         box-shadow: 0 0 8px 2px var(--day-highlight-shadow, rgba(30, 144, 255, 0.5)); /* Shadow from Electric Blue */
-         transform: none; /* No scale needed in list */
-     }
-
-
+     .calendar-day.search-highlight { border-color: var(--day-highlight-border); box-shadow: 0 0 8px 2px var(--day-highlight-shadow); transform: none; }
     .day-number { position: absolute; top: 5px; right: 5px; font-size: 0.8em; font-weight: bold; color: var(--overlay-text-color); background-color: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: var(--radius-small); z-index: 2; margin: 0; min-width: auto; text-shadow: none; }
     .game-list { display: block !important; flex-grow: 1; position: relative; z-index: 2; padding: 0 6px; margin-top: 25px; overflow-y: auto; max-height: calc(100% - 30px); font-size: 0.75em; }
     .game-list-item { background-color: var(--list-item-bg); color: var(--overlay-text-color); border-bottom: none; padding: 3px 6px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: var(--radius-small); }
     .game-list-item:last-child { border-bottom: none; }
     .game-list-item:hover { background-color: var(--list-item-hover); color: var(--overlay-text-color); }
-
     .loading { grid-column: auto; border-radius: var(--radius-medium); position: relative; min-height: 100px; }
     .api-credit { font-size: 0.7em; margin-top: 15px;}
 }
