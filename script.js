@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // API Key is no longer stored or used directly in client-side JS
+    // API Key is handled by Netlify Functions, no client-side key needed.
 
     const calendarGrid = document.querySelector('.calendar-grid');
     const currentMonthYearDisplay = document.getElementById('currentMonthYear');
@@ -18,16 +18,62 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchTimeout;
 
     let currentDate = new Date();
-    let gamesCache = {}; // Client-side caching
+    let gamesCache = {};
     let gamesByDay = {};
     let activeSlideshowIntervals = [];
 
     const monthNames = ["January", "February", "March", "April", "May", "June",
                         "July", "August", "September", "October", "November", "December"];
 
+    // --- UTILITY FUNCTIONS --- (Moved some utilities up)
+    function getDaysInMonth(year, month) { return new Date(year, month + 1, 0).getDate(); }
+    
+    function showLoading(isLoading) {
+        if(loadingIndicator) loadingIndicator.style.display = isLoading ? 'flex' : 'none';
+        [prevMonthBtn, nextMonthBtn, todayBtn, goToDateBtn, gameSearchInput].forEach(el => {
+            if(el) el.disabled = isLoading;
+        });
+    }
+
+    function displayError(message) {
+        if(errorMessagesDiv) {
+            errorMessagesDiv.textContent = message;
+            errorMessagesDiv.style.display = 'block';
+        }
+    }
+
+    // --- SEARCH HANDLER FUNCTIONS (DEFINED BEFORE setupEventListeners) ---
+    function handleSearchInput() {
+        clearTimeout(searchTimeout);
+        const query = gameSearchInput.value.trim();
+        if (query.length < 3) {
+            if(searchSuggestionsDiv) {
+                searchSuggestionsDiv.style.display = 'none';
+                searchSuggestionsDiv.innerHTML = '';
+            }
+            return;
+        }
+        if(searchSuggestionsDiv) {
+            searchSuggestionsDiv.innerHTML = '<div class="list-group-item disabled">Searching...</div>';
+            searchSuggestionsDiv.style.display = 'block';
+        }
+        searchTimeout = setTimeout(() => fetchSearchSuggestions(query), 400);
+    }
+
+    function handleSearchKeyDown(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const query = gameSearchInput.value.trim();
+            if(searchSuggestionsDiv) searchSuggestionsDiv.style.display = 'none';
+            if (query) findAndGoToGame(query); // Will use the current input value for a direct search
+        }
+    }
+
+
+    // --- SETUP AND INITIALIZATION ---
     async function init() {
         console.log("Client: init() called");
-        setupEventListeners();
+        setupEventListeners(); // Now handleSearchInput and handleSearchKeyDown are defined
         populateMonthYearSelectors();
         loadDarkModePreference();
         try {
@@ -41,10 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupEventListeners() {
-        prevMonthBtn.addEventListener('click', () => navigateMonth(-1));
-        nextMonthBtn.addEventListener('click', () => navigateMonth(1));
-        todayBtn.addEventListener('click', goToToday);
-        goToDateBtn.addEventListener('click', () => {
+        console.log("Client: setupEventListeners() called");
+        if(prevMonthBtn) prevMonthBtn.addEventListener('click', () => navigateMonth(-1));
+        if(nextMonthBtn) nextMonthBtn.addEventListener('click', () => navigateMonth(1));
+        if(todayBtn) todayBtn.addEventListener('click', goToToday);
+        if(goToDateBtn) goToDateBtn.addEventListener('click', () => {
             const year = parseInt(yearSelect.value);
             const month = parseInt(monthSelect.value);
             if (isNaN(year) || isNaN(month)) {
@@ -56,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         const toggleContainer = document.getElementById('darkModeToggleContainer');
-        if(toggleContainer) {
+        if(toggleContainer && darkModeToggle) { // Ensure both exist
             darkModeToggle.addEventListener('change', toggleDarkMode);
             toggleContainer.addEventListener('click', (event) => {
                 if (event.target !== darkModeToggle && event.target.parentNode !== darkModeToggle) {
@@ -66,8 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        gameSearchInput.addEventListener('input', handleSearchInput);
-        gameSearchInput.addEventListener('keydown', handleSearchKeyDown);
+        if(gameSearchInput) gameSearchInput.addEventListener('input', handleSearchInput); // Now defined
+        if(gameSearchInput) gameSearchInput.addEventListener('keydown', handleSearchKeyDown); // Now defined
+        
         document.addEventListener('click', (event) => {
             if (searchSuggestionsDiv && !searchSuggestionsDiv.contains(event.target) && event.target !== gameSearchInput) {
                 searchSuggestionsDiv.style.display = 'none';
@@ -75,9 +123,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- DARK MODE FUNCTIONS ---
     function loadDarkModePreference() {
         const isDarkMode = localStorage.getItem('darkMode') === 'true';
-        if (darkModeToggle) darkModeToggle.checked = isDarkMode; // Check if element exists
+        if (darkModeToggle) darkModeToggle.checked = isDarkMode;
         
         document.body.classList.toggle('dark-mode', isDarkMode);
         document.body.classList.toggle('light-mode', !isDarkMode);
@@ -101,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- CALENDAR NAVIGATION AND RENDERING ---
     function navigateMonth(direction) {
         currentDate.setMonth(currentDate.getMonth() + direction);
         renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
@@ -116,8 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentYr = new Date().getFullYear();
         for (let i = currentYr - 10; i <= currentYr + 10; i++) yearSelect.add(new Option(i, i));
     }
-
-    function getDaysInMonth(year, month) { return new Date(year, month + 1, 0).getDate(); }
 
     function clearAllSlideshows() {
         activeSlideshowIntervals.forEach(clearInterval);
@@ -266,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
         activeSlideshowIntervals.push(intervalId);
     }
 
+    // --- API CALLS VIA NETLIFY FUNCTIONS ---
     async function fetchGamesForMonth(year, month) {
         const cacheKey = `month-${year}-${month}`;
         if (gamesCache[cacheKey]) {
@@ -335,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.results) {
                 displaySearchSuggestions(data.results);
             } else {
-                console.error("Client: Unexpected data structure from function (fetchSearchSuggestions):", data);
+                 console.error("Client: Unexpected data structure from function (fetchSearchSuggestions):", data);
                 if(searchSuggestionsDiv) searchSuggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Unexpected data.</div>';
             }
         } catch (error) {
@@ -393,6 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoading(false);
     }
 
+    // --- SEARCH DISPLAY UTILITY ---
     function displaySearchSuggestions(suggestions) {
         if(!searchSuggestionsDiv) return;
         searchSuggestionsDiv.innerHTML = '';
@@ -414,20 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
             searchSuggestionsDiv.appendChild(item);
         });
     }
-
-    function showLoading(isLoading) {
-        if(loadingIndicator) loadingIndicator.style.display = isLoading ? 'flex' : 'none';
-        [prevMonthBtn, nextMonthBtn, todayBtn, goToDateBtn, gameSearchInput].forEach(el => {
-            if(el) el.disabled = isLoading;
-        });
-    }
-
-    function displayError(message) {
-        if(errorMessagesDiv) {
-            errorMessagesDiv.textContent = message;
-            errorMessagesDiv.style.display = 'block';
-        }
-    }
     
+    // Call init at the end to start the application
     init();
 });
