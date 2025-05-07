@@ -18,19 +18,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchTimeout;
 
     let currentDate = new Date();
-    let gamesCache = {}; // Client-side caching can still be useful to reduce calls to your function
+    let gamesCache = {}; // Client-side caching
     let gamesByDay = {};
     let activeSlideshowIntervals = [];
 
     const monthNames = ["January", "February", "March", "April", "May", "June",
                         "July", "August", "September", "October", "November", "December"];
 
-    function init() {
-        // No API key check here anymore, as it's handled server-side
+    async function init() {
+        console.log("Client: init() called");
         setupEventListeners();
         populateMonthYearSelectors();
         loadDarkModePreference();
-        renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+        try {
+            console.log("Client: Calling initial renderCalendar...");
+            await renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+            console.log("Client: Initial renderCalendar finished.");
+        } catch (error) {
+            console.error("Client: Error during initial renderCalendar:", error);
+            displayError("Failed to load initial calendar data. Please try refreshing.");
+        }
     }
 
     function setupEventListeners() {
@@ -40,6 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
         goToDateBtn.addEventListener('click', () => {
             const year = parseInt(yearSelect.value);
             const month = parseInt(monthSelect.value);
+            if (isNaN(year) || isNaN(month)) {
+                console.error("Client: Invalid year or month selected for Go To Date.");
+                return;
+            }
             currentDate = new Date(year, month, 1);
             renderCalendar(year, month);
         });
@@ -66,16 +77,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadDarkModePreference() {
         const isDarkMode = localStorage.getItem('darkMode') === 'true';
-        darkModeToggle.checked = isDarkMode;
+        if (darkModeToggle) darkModeToggle.checked = isDarkMode; // Check if element exists
+        
         document.body.classList.toggle('dark-mode', isDarkMode);
         document.body.classList.toggle('light-mode', !isDarkMode);
+
         updateDarkModeIcon(isDarkMode);
     }
 
     function toggleDarkMode() {
         const isDarkMode = darkModeToggle.checked;
+        
         document.body.classList.toggle('dark-mode', isDarkMode);
         document.body.classList.toggle('light-mode', !isDarkMode);
+        
         localStorage.setItem('darkMode', isDarkMode);
         updateDarkModeIcon(isDarkMode);
     }
@@ -110,26 +125,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function renderCalendar(year, month) {
+        console.log(`Client: renderCalendar(${year}, ${month}) called`);
         showLoading(true);
-        errorMessagesDiv.style.display = 'none';
-        currentMonthYearDisplay.textContent = `${monthNames[month]} ${year}`;
-        monthSelect.value = month;
-        yearSelect.value = year;
+        if(errorMessagesDiv) errorMessagesDiv.style.display = 'none';
+        if(currentMonthYearDisplay) currentMonthYearDisplay.textContent = `${monthNames[month]} ${year}`;
+        if(monthSelect) monthSelect.value = month;
+        if(yearSelect) yearSelect.value = year;
 
         clearAllSlideshows();
-        calendarGrid.querySelectorAll('.calendar-day, .empty-day').forEach(cell => cell.remove());
+        if(calendarGrid) calendarGrid.querySelectorAll('.calendar-day, .empty-day').forEach(cell => cell.remove());
 
         const firstDayOfMonth = new Date(year, month, 1).getDay();
         const daysInCurrentMonth = getDaysInMonth(year, month);
         const todayObj = new Date();
 
         for (let i = 0; i < firstDayOfMonth; i++) {
-            calendarGrid.appendChild(Object.assign(document.createElement('div'), { className: 'empty-day calendar-day' }));
+            if(calendarGrid) calendarGrid.appendChild(Object.assign(document.createElement('div'), { className: 'empty-day calendar-day' }));
         }
 
-        const gamesForMonth = await fetchGamesForMonth(year, month); // Calls the function that now uses Netlify func
+        console.log(`Client: Attempting to fetch games for ${year}-${month + 1}`);
+        const gamesForMonth = await fetchGamesForMonth(year, month);
+        console.log("Client: gamesForMonth received in renderCalendar:", gamesForMonth ? `${gamesForMonth.length} games` : "null/undefined");
+
         gamesByDay = {};
-        if (gamesForMonth) {
+        if (gamesForMonth && Array.isArray(gamesForMonth)) {
             gamesForMonth.forEach(game => {
                 if (game.released) {
                     const releaseDate = new Date(game.released + 'T00:00:00');
@@ -138,6 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     gamesByDay[day].push(game);
                 }
             });
+        } else if (gamesForMonth) {
+            console.warn("Client: gamesForMonth is not an array:", gamesForMonth);
         }
 
         for (let day = 1; day <= daysInCurrentMonth; day++) {
@@ -213,14 +234,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 contentWrapper.appendChild(dayGamesListDiv);
             }
             dayCell.appendChild(contentWrapper);
-            calendarGrid.appendChild(dayCell);
+            if(calendarGrid) calendarGrid.appendChild(dayCell);
         }
 
         const totalCells = firstDayOfMonth + daysInCurrentMonth;
         const remainingCells = (7 - (totalCells % 7)) % 7;
         for (let i = 0; i < remainingCells; i++) {
-            calendarGrid.appendChild(Object.assign(document.createElement('div'), { className: 'empty-day calendar-day' }));
+            if(calendarGrid) calendarGrid.appendChild(Object.assign(document.createElement('div'), { className: 'empty-day calendar-day' }));
         }
+        console.log(`Client: Finished processing day cells for ${year}-${month}`);
         showLoading(false);
     }
 
@@ -228,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const images = slideshowDiv.querySelectorAll('img');
         if (images.length === 0) return;
         let currentIndex = 0;
-        if (images[currentIndex]) { // Check if the first image exists
+        if (images[currentIndex]) {
             images[currentIndex].classList.add('active-slide');
         }
         if (intervalTime === 0 || images.length <= 1) return;
@@ -244,8 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
         activeSlideshowIntervals.push(intervalId);
     }
 
-    // --- API Calls now go through Netlify Function ---
-
     async function fetchGamesForMonth(year, month) {
         const cacheKey = `month-${year}-${month}`;
         if (gamesCache[cacheKey]) {
@@ -255,9 +275,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const params = new URLSearchParams({
             year: year.toString(),
-            month: month.toString(), // Send 0-indexed month
-            ordering: '-metacritic,-added', // Default ordering
-            pageSize: '40' // Default page size
+            month: month.toString(),
+            ordering: '-metacritic,-added',
+            pageSize: '40'
         });
         const functionUrl = `/.netlify/functions/getGames?${params.toString()}`;
         console.log("Client: Fetching month data from Netlify function:", functionUrl);
@@ -265,19 +285,25 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(functionUrl);
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: "Failed to parse error from function." }));
-                console.error("Error from Netlify function (fetchGamesForMonth):", response.status, errorData);
-                displayError(`Error fetching games: ${errorData.error || `Server error ${response.status}`}`);
+                let errorDetails = "Server error, no details provided.";
+                try {
+                    const errorData = await response.json();
+                    errorDetails = errorData.error || (errorData.details ? JSON.stringify(errorData.details) : response.statusText);
+                    console.error("Client: Error from Netlify function (fetchGamesForMonth):", response.status, errorData);
+                } catch (e) {
+                    console.error("Client: Error from Netlify function (fetchGamesForMonth), couldn't parse JSON:", response.status, response.statusText);
+                }
+                displayError(`Error fetching games: ${errorDetails}`);
                 return null;
             }
             const data = await response.json();
-            console.log("Client: Received month data:", data);
-            if (data.results) { // Assuming function returns RAWG-like structure
+            console.log("Client: Received month data from function:", data);
+            if (data && data.results && Array.isArray(data.results)) {
                 gamesCache[cacheKey] = data.results;
                 return data.results;
             } else {
-                console.error("Client: Unexpected data structure from function (fetchGamesForMonth):", data);
-                displayError("Received unexpected data from game service.");
+                console.error("Client: Unexpected data structure from function (fetchGamesForMonth). Expected 'results' array:", data);
+                displayError("Received unexpected data format from game service.");
                 return null;
             }
         } catch (error) {
@@ -300,8 +326,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(functionUrl);
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ error: "Failed to parse error from function." }));
-                console.error("Error from Netlify function (fetchSearchSuggestions):", response.status, errorData);
-                searchSuggestionsDiv.innerHTML = `<div class="list-group-item text-danger">Error: ${errorData.error || `Server error ${response.status}`}</div>`;
+                console.error("Client: Error from Netlify function (fetchSearchSuggestions):", response.status, errorData);
+                if(searchSuggestionsDiv) searchSuggestionsDiv.innerHTML = `<div class="list-group-item text-danger">Error: ${errorData.error || `Server error ${response.status}`}</div>`;
                 return;
             }
             const data = await response.json();
@@ -309,25 +335,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.results) {
                 displaySearchSuggestions(data.results);
             } else {
-                 console.error("Client: Unexpected data structure from function (fetchSearchSuggestions):", data);
-                searchSuggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Unexpected data.</div>';
+                console.error("Client: Unexpected data structure from function (fetchSearchSuggestions):", data);
+                if(searchSuggestionsDiv) searchSuggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Unexpected data.</div>';
             }
         } catch (error) {
             console.error("Client: Network error calling Netlify function (fetchSearchSuggestions):", error);
-            searchSuggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Network error.</div>';
+            if(searchSuggestionsDiv) searchSuggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Network error.</div>';
         }
     }
 
     async function findAndGoToGame(gameName, releaseDateStr, gameSlug) {
         showLoading(true);
-        errorMessagesDiv.style.display = 'none';
+        if(errorMessagesDiv) errorMessagesDiv.style.display = 'none';
         let gameToNavigate = { name: gameName, released: releaseDateStr, slug: gameSlug };
 
-        if (!releaseDateStr && gameName) { // If only name, need to fetch details for release date
+        if (!releaseDateStr && gameName) {
             const params = new URLSearchParams({
                 searchQuery: gameName,
                 pageSize: '1',
-                searchExact: 'true' // Try for an exact match to get the specific game
+                searchExact: 'true'
             });
             const functionUrl = `/.netlify/functions/getGames?${params.toString()}`;
             console.log("Client: Fetching game details from Netlify function:", functionUrl);
@@ -340,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const data = await response.json();
                 if (data.results && data.results.length > 0) {
-                    gameToNavigate = data.results[0]; // Update with fetched details
+                    gameToNavigate = data.results[0];
                 } else {
                     throw new Error('Game not found in precise search via function.');
                 }
@@ -367,8 +393,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoading(false);
     }
 
-    // --- Utility Functions ---
     function displaySearchSuggestions(suggestions) {
+        if(!searchSuggestionsDiv) return;
         searchSuggestionsDiv.innerHTML = '';
         if (!suggestions || suggestions.length === 0) {
             searchSuggestionsDiv.innerHTML = '<div class="list-group-item disabled">No games found.</div>'; return;
@@ -381,9 +407,8 @@ document.addEventListener('DOMContentLoaded', () => {
             item.innerHTML = `<img src="${game.background_image || 'https://via.placeholder.com/40x25?text=G'}" alt="" width="40" height="25" class="me-2 rounded" style="object-fit:cover;"> ${text}`;
             item.addEventListener('click', (e) => {
                 e.preventDefault();
-                gameSearchInput.value = game.name;
+                if(gameSearchInput) gameSearchInput.value = game.name;
                 searchSuggestionsDiv.style.display = 'none';
-                // Pass along potentially fetched slug and release date to avoid re-fetch if possible
                 findAndGoToGame(game.name, game.released, game.slug);
             });
             searchSuggestionsDiv.appendChild(item);
@@ -391,13 +416,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showLoading(isLoading) {
-        loadingIndicator.style.display = isLoading ? 'flex' : 'none';
-        [prevMonthBtn, nextMonthBtn, todayBtn, goToDateBtn, gameSearchInput].forEach(el => el.disabled = isLoading);
+        if(loadingIndicator) loadingIndicator.style.display = isLoading ? 'flex' : 'none';
+        [prevMonthBtn, nextMonthBtn, todayBtn, goToDateBtn, gameSearchInput].forEach(el => {
+            if(el) el.disabled = isLoading;
+        });
     }
 
     function displayError(message) {
-        errorMessagesDiv.textContent = message;
-        errorMessagesDiv.style.display = 'block';
+        if(errorMessagesDiv) {
+            errorMessagesDiv.textContent = message;
+            errorMessagesDiv.style.display = 'block';
+        }
     }
     
     init();
