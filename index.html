@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Release Calendar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="site-header sticky-top">
+        <div class="container-fluid header-container">
+            <a href="/" class="header-logo" aria-label="Homepage">
+                CALENDAR
+            </a>
+            <div class="header-search-container">
+                <div class="search-input-wrapper">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" id="gameSearchInput" class="form-control search-input" placeholder="Search games...">
+                    <div class="search-shortcut">alt + enter</div>
+                </div>
+                <div id="searchSuggestions" class="list-group position-absolute w-100" style="z-index: 1050; display:none; top: 100%; left: 0;"></div>
+            </div>
+            <nav class="header-nav">
+                <a href="#" class="header-nav-item" aria-label="Notifications" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                </a>
+                <div class="form-check form-switch header-nav-item ms-2 me-2" title="Toggle Dark Mode" id="darkModeToggleContainer">
+                    <input class="form-check-input" type="checkbox" role="switch" id="darkModeToggle">
+                    <label class="form-check-label visually-hidden" for="darkModeToggle">Dark Mode</label>
+                    <span id="darkModeIconContainer" class="ms-1"><i class="bi bi-moon-stars-fill"></i></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Month Navigation Header - MOVED OUTSIDE calendar-container for full width -->
+    <div class="month-navigation-header sticky-top-subheader shadow-sm"> <!-- New class for potential second sticky layer -->
+        <div class="container-fluid month-nav-content-container p-3"> <!-- Inner container for content alignment -->
+            <div class="row align-items-center gy-2">
+                 <div class="col-12 col-md-auto me-md-auto">
+                    <button id="prevMonthBtn" class="btn btn-outline-primary"><i class="bi bi-chevron-left"></i> Prev</button>
+                    <button id="nextMonthBtn" class="btn btn-outline-primary">Next <i class="bi bi-chevron-right"></i></button>
+                    <button id="todayBtn" class="btn btn-outline-secondary ms-2">Today</button>
+                </div>
+                <div class="col-12 col-md-auto">
+                    <div class="d-flex justify-content-md-end align-items-center">
+                        <span class="align-self-center me-2" id="goToLabel">Go to:</span>
+                        <select id="monthSelect" class="form-select form-select-sm w-auto me-2"></select>
+                        <select id="yearSelect" class="form-select form-select-sm w-auto me-2"></select>
+                        <button id="goToDateBtn" class="btn btn-primary btn-sm">Go</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content area -->
+    <div class="container-fluid calendar-container"> <!-- Removed mb-3 from month-nav, will be on calendar-container if needed -->
+        <div id="currentMonthYear" class="text-center h3 my-3"></div>
+        <div id="loadingIndicator" class="text-center my-5" style="display: none;">
+            <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+            <p>Fetching games...</p>
+        </div>
+        <div id="errorMessages" class="alert alert-danger mx-3" style="display: none;" role="alert"></div>
+
+        <div class="calendar-grid mb-4">
+            <div class="day-name">Sun</div>
+            <div class="day-name">Mon</div>
+            <div class="day-name">Tue</div>
+            <div class="day-name">Wed</div>
+            <div class="day-name">Thu</div>
+            <div class="day-name">Fri</div>
+            <div class="day-name">Sat</div>
+        </div>
+
+        <footer class="text-center p-3 mt-4 border-top">
+            <small>Game data provided by <a href="https://rawg.io/" target="_blank">RAWG API</a></small>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

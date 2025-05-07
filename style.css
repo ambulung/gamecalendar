@@ -1,0 +1,401 @@
+:root {
+    /* Palette Variables */
+    --palette-darkest: #2B303A;
+    --palette-medium-dark: #4F5B66;
+    --palette-accent: #00A9B7;
+    --palette-light: #F5F5F5;
+    --palette-white: #FFFFFF;
+    --palette-darkest-rgb: 43, 48, 58;
+    --palette-accent-rgb: 0, 169, 183;
+
+    /* Site Header specific vars (Dark Mode is default for this header style) */
+    --site-header-bg: #151515;
+    --site-header-text: #e0e0e0;
+    --site-header-search-bg: #2d2d2d;
+    --site-header-search-placeholder: #777777;
+    --site-header-search-icon: #777777;
+    --site-header-search-shortcut-bg: #3a3a3a;
+    --site-header-search-shortcut-text: #aaa;
+    --site-header-nav-item-hover-bg: #2a2a2a;
+
+    /* Light Mode Theme */
+    --calendar-bg: var(--palette-light);
+    --calendar-text: var(--palette-darkest);
+    --calendar-border: #d1d5db;
+    --calendar-today-border: var(--palette-accent);
+    --sub-header-bg: var(--palette-white);
+    --sub-header-text: var(--palette-darkest);
+    --sub-header-border: #e0e0e0;
+    --day-game-item-text: var(--palette-darkest);
+    --scrollbar-thumb: #b0bec5;
+    --scrollbar-track: transparent;
+    --btn-primary-bg: var(--palette-accent);
+    --btn-primary-text: var(--palette-white);
+    --btn-outline-primary-text: var(--palette-accent);
+    --btn-outline-primary-border: var(--palette-accent);
+    --btn-outline-primary-hover-bg: var(--palette-accent);
+    --btn-outline-primary-hover-text: var(--palette-white);
+    --form-control-bg: var(--palette-white);
+    --content-wrapper-overlay-light: rgba(245, 245, 245, 0.65);
+    --day-number-text-light: var(--palette-darkest);
+    --day-number-text-shadow-light: none;
+    --day-game-item-text-shadow-light: none;
+    --dark-mode-icon-color: var(--palette-medium-dark);
+}
+
+body.dark-mode {
+    /* Dark Mode Theme */
+    --calendar-bg: var(--palette-darkest);
+    --calendar-text: var(--palette-light);
+    --calendar-border: var(--palette-medium-dark);
+    --calendar-today-border: var(--palette-accent);
+    --sub-header-bg: #22272F;
+    --sub-header-text: var(--palette-light);
+    --sub-header-border: #30363d;
+    --day-game-item-text: var(--palette-light);
+    --scrollbar-thumb: var(--palette-medium-dark);
+    --scrollbar-track: transparent;
+    --btn-primary-bg: var(--palette-accent);
+    --btn-primary-text: var(--palette-darkest);
+    --btn-outline-primary-text: var(--palette-accent);
+    --btn-outline-primary-border: var(--palette-accent);
+    --btn-outline-primary-hover-bg: var(--palette-accent);
+    --btn-outline-primary-hover-text: var(--palette-darkest);
+    --form-control-bg: #373e47;
+    --content-wrapper-overlay-dark: rgba(var(--palette-darkest-rgb), 0.75);
+    --day-number-text-dark: var(--palette-light);
+    --day-number-text-shadow-dark: none;
+    --day-game-item-text-shadow-dark: none;
+    --dark-mode-icon-color: var(--palette-accent);
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* Ensure body can be a reference for full height if needed */
+}
+
+body {
+    background-color: var(--calendar-bg);
+    color: var(--calendar-text);
+    transition: background-color 0.3s, color 0.3s;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* No body padding-top needed if headers are part of normal flow or sticky */
+}
+
+/* Site Header Styles */
+.site-header {
+    background-color: var(--site-header-bg);
+    padding: 0.5rem 0;
+    height: 60px;
+    border-bottom: 1px solid #2a2a2a;
+    /* .sticky-top from Bootstrap handles position: sticky, top: 0, z-index: 1020 */
+    /* We might need to increase z-index if other sticky elements conflict */
+}
+.header-container {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 100%; padding-left: 1rem; padding-right: 1rem;
+    max-width: 1600px; margin: 0 auto;
+}
+.header-logo {
+    font-size: 1.5rem; font-weight: bold; color: var(--site-header-text);
+    text-decoration: none; margin-right: 1.5rem; white-space: nowrap;
+}
+.header-logo:hover { color: var(--palette-accent); }
+.header-search-container {
+    flex-grow: 1; max-width: 700px;
+    margin-left: 1rem; margin-right: 1rem; position: relative;
+}
+.search-input-wrapper {
+    display: flex; align-items: center; background-color: var(--site-header-search-bg);
+    border-radius: 20px; padding: 0.3rem 0.75rem; height: 40px;
+}
+.search-icon {
+    color: var(--site-header-search-icon); margin-right: 0.5rem; font-size: 1rem;
+}
+.search-input {
+    flex-grow: 1; background-color: transparent; border: none;
+    color: var(--site-header-text); font-size: 0.9rem; padding: 0;
+}
+.search-input:focus {
+    box-shadow: none; background-color: transparent; color: var(--site-header-text);
+}
+.search-input::placeholder { color: var(--site-header-search-placeholder); opacity: 1; }
+.search-shortcut {
+    background-color: var(--site-header-search-shortcut-bg);
+    color: var(--site-header-search-shortcut-text);
+    font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 4px;
+    margin-left: 0.5rem; white-space: nowrap;
+}
+#searchSuggestions {
+    margin-top: 0.25rem; border: 1px solid var(--palette-medium-dark);
+    border-radius: 0.5rem; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.3);
+    background-color: var(--site-header-search-bg);
+}
+#searchSuggestions .list-group-item {
+    background-color: transparent; border: none;
+    border-bottom: 1px solid var(--palette-medium-dark);
+    color: var(--site-header-text); padding: 0.6rem 1rem;
+}
+#searchSuggestions .list-group-item:last-child { border-bottom: none; }
+#searchSuggestions .list-group-item:hover { background-color: var(--site-header-nav-item-hover-bg); }
+#searchSuggestions .list-group-item img { border-radius: 3px; }
+.header-nav { display: flex; align-items: center; }
+.header-nav-item {
+    color: var(--site-header-text); font-size: 1.2rem;
+    padding: 0.5rem 0.6rem; border-radius: 50%;
+    text-decoration: none; display: flex; align-items: center;
+    transition: background-color 0.2s, color 0.2s;
+}
+.header-nav-item:hover {
+    background-color: var(--site-header-nav-item-hover-bg); color: var(--palette-accent);
+}
+.header-nav-item.form-check {
+    padding-left: 0.5rem; padding-right: 0.5rem;
+    cursor: pointer;
+}
+#darkModeIconContainer i {
+    font-size: 1.1rem;
+    color: var(--dark-mode-icon-color);
+    transition: color 0.2s;
+    vertical-align: middle;
+}
+.header-nav-item.form-check:hover #darkModeIconContainer i {
+    color: var(--palette-accent);
+}
+.form-check-input { /* For main header toggle */
+    background-color: var(--palette-medium-dark);
+    border-color: var(--palette-medium-dark);
+    cursor: pointer;
+}
+.form-check-input:checked {
+    background-color: var(--palette-accent);
+    border-color: var(--palette-accent);
+}
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(var(--palette-accent-rgb), 0.25);
+}
+
+/* Month Navigation Sub-Header (Full Width) */
+.month-navigation-header {
+    background-color: var(--sub-header-bg);
+    color: var(--sub-header-text);
+    border-bottom: 1px solid var(--sub-header-border);
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    padding: 0; /* Outer div is full width, no padding */
+}
+.sticky-top-subheader { /* Making the sub-header sticky below the main header */
+    position: sticky;
+    top: 60px; /* Height of the .site-header */
+    z-index: 1020; /* Below .site-header's default sticky-top z-index (1020) if site-header is also sticky but higher. Bootstrap .sticky-top is 1020 */
+                  /* If .site-header uses default Bootstrap .sticky-top, this needs to be lower or .site-header needs to be higher */
+}
+.site-header.sticky-top {
+    z-index: 1021; /* Ensure main header is on top of sub-header if both are sticky */
+}
+.month-nav-content-container { /* Inner container to center the content */
+    max-width: 1600px; /* Or your preferred content width, e.g., same as .header-container */
+    margin: 0 auto;
+    /* Bootstrap .p-3 class in HTML handles padding */
+}
+/* Controls within month-navigation-header */
+.month-navigation-header .form-control,
+.month-navigation-header .form-select {
+    background-color: var(--form-control-bg); /* Use general form control bg based on theme */
+    color: var(--calendar-text); /* Use main calendar text color for forms */
+    border-color: var(--calendar-border);
+}
+.month-navigation-header .btn-primary {
+    background-color: var(--btn-primary-bg);
+    border-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+}
+.month-navigation-header .btn-primary:hover {
+    background-color: color-mix(in srgb, var(--btn-primary-bg) 85%, black);
+    border-color: color-mix(in srgb, var(--btn-primary-bg) 80%, black);
+}
+.month-navigation-header .btn-outline-primary {
+    color: var(--btn-outline-primary-text);
+    border-color: var(--btn-outline-primary-border);
+}
+.month-navigation-header .btn-outline-primary:hover {
+    color: var(--btn-outline-primary-hover-text);
+    background-color: var(--btn-outline-primary-hover-bg);
+}
+.month-navigation-header .btn-outline-secondary {
+    color: var(--palette-medium-dark);
+    border-color: var(--palette-medium-dark);
+}
+.month-navigation-header .btn-outline-secondary:hover {
+    color: var(--palette-light);
+    background-color: var(--palette-medium-dark);
+}
+body.dark-mode .month-navigation-header .btn-outline-secondary {
+    color: #a0b0c0;
+    border-color: #a0b0c0;
+}
+body.dark-mode .month-navigation-header .btn-outline-secondary:hover {
+    color: var(--palette-darkest);
+    background-color: #a0b0c0;
+}
+#goToLabel {
+    color: var(--sub-header-text);
+}
+
+
+/* Main Calendar Container - now directly after headers */
+.calendar-container {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 1rem; /* Space below the (potentially sticky) sub-header */
+    padding-bottom: 1rem;
+}
+
+/* Calendar Grid and Day Cell styles (These should remain largely the same) */
+.calendar-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
+    border: 1px solid var(--calendar-border); padding: 5px;
+    border-radius: 0.25rem;
+}
+.day-name {
+    font-weight: bold; text-align: center; padding: 0.5rem 0.25rem;
+    font-size: 0.9rem; border-bottom: 1px solid var(--calendar-border);
+    color: var(--calendar-text);
+}
+.calendar-day {
+    position: relative; width: 100%; height: 0; padding-bottom: 100%;
+    border: 1px solid var(--calendar-border);
+    border-radius: 0.25rem;
+    background-color: var(--calendar-bg);
+    overflow: hidden;
+}
+.day-background-slideshow {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+}
+.day-background-slideshow img {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+.day-background-slideshow img.active-slide { opacity: 1; z-index: 1; }
+.day-content-wrapper {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    padding: 5px; display: flex; flex-direction: column; overflow: hidden;
+    z-index: 2;
+    background-color: var(--content-wrapper-overlay-light);
+    transition: background-color 0.3s;
+}
+body.dark-mode .day-content-wrapper {
+     background-color: var(--content-wrapper-overlay-dark);
+}
+.calendar-day.empty-day .day-content-wrapper { background-color: transparent !important; }
+body.dark-mode .calendar-day.empty-day {
+    background-color: color-mix(in srgb, var(--palette-darkest) 90%, black);
+}
+.day-number {
+    align-self: flex-end; font-size: 0.8rem; font-weight: bold;
+    color: var(--day-number-text-light);
+    text-shadow: var(--day-number-text-shadow-light);
+    padding: 1px 4px; border-radius: 3px; margin-bottom: 4px; line-height: 1.2;
+    flex-shrink: 0;
+}
+body.dark-mode .day-number {
+    color: var(--day-number-text-dark);
+    text-shadow: var(--day-number-text-shadow-dark);
+}
+.calendar-day.today {
+    outline: 2px solid var(--calendar-today-border); outline-offset: -1px;
+}
+.calendar-day.today .day-number {
+    background-color: var(--calendar-today-border);
+    color: var(--palette-darkest); text-shadow: none;
+}
+body:not(.dark-mode) .calendar-day.today .day-number {
+    color: var(--palette-white);
+}
+.day-games-list {
+    flex-grow: 1; overflow-y: auto; overflow-x: hidden; min-height: 0;
+}
+.day-games-list::-webkit-scrollbar { width: 5px; }
+.day-games-list::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+.day-games-list::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb); border-radius: 10px; }
+.day-games-list { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
+.day-game-item {
+    display: flex; align-items: center; padding: 3px; margin-bottom: 3px;
+    border-radius: 3px;
+    background-color: transparent;
+    font-size: 0.7rem;
+    color: var(--day-game-item-text);
+    text-shadow: var(--day-game-item-text-shadow-dark);
+    cursor: pointer; text-decoration: none;
+    transition: background-color 0.15s ease-in-out;
+}
+body:not(.dark-mode) .day-game-item {
+    text-shadow: var(--day-game-item-text-shadow-light);
+}
+.day-game-item:last-child { margin-bottom: 1px; }
+.day-game-item:hover { background-color: rgba(0,0,0,0.08); }
+body.dark-mode .day-game-item:hover { background-color: rgba(255,255,255,0.05); }
+.day-game-item img {
+    width: 32px; height: 20px; object-fit: cover; margin-right: 5px;
+    border-radius: 2px; flex-shrink: 0;
+    background-color: var(--palette-medium-dark);
+}
+body:not(.dark-mode) .day-game-item img { background-color: #e0e0e0; }
+.day-game-item .game-name {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    flex-grow: 1; line-height: 1.3;
+}
+.day-game-item .game-metacritic {
+    font-size: 0.65rem; font-weight: bold; padding: 1px 3px;
+    border-radius: 2px; margin-left: 4px; color: white; flex-shrink: 0; text-shadow: none;
+}
+
+/* Alert Messages, Loading, Footer */
+.alert-danger { background-color: #f8d7da; border-color: #f5c2c7; color: #842029; }
+body.dark-mode .alert-danger {
+    background-color: color-mix(in srgb, #842029 30%, var(--palette-darkest) 70%);
+    border-color: color-mix(in srgb, #842029 50%, var(--palette-darkest) 50%); color: #f5c2c7;
+}
+body.dark-mode .spinner-border { color: var(--palette-accent) !important; }
+footer { border-top: 1px solid var(--calendar-border); color: var(--calendar-text); padding-top: 1rem; padding-bottom: 1rem;}
+footer a { color: var(--palette-accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .header-logo { font-size: 1.3rem; margin-right: 1rem; }
+    .header-search-container { max-width: 500px; }
+}
+@media (max-width: 768px) {
+    .site-header { height: 56px; }
+    .sticky-top-subheader { top: 56px; } /* Match new main header height */
+
+    .header-logo { display: none; }
+    .header-search-container { margin-left: 0.5rem; margin-right: 0.5rem; max-width: none; }
+    .search-input-wrapper { height: 38px; }
+    .search-shortcut { display: none; }
+    .header-nav-item { font-size: 1.1rem; padding: 0.4rem 0.5rem;}
+
+    .month-nav-content-container .row > div {
+        width: 100%; text-align: center; margin-bottom: 0.5rem;
+    }
+    .month-nav-content-container .row > div:last-child { margin-bottom: 0; }
+    .month-nav-content-container .d-flex.justify-content-md-end { justify-content: center !important; }
+
+    .day-name { font-size: 0.75rem; padding: 0.3rem 0.1rem; }
+    .day-game-item { font-size: 0.65rem; }
+    .day-game-item img { width: 28px; height: 18px; }
+    .day-number { font-size: 0.7rem; }
+}
+@media (max-width: 576px) {
+    #currentMonthYear { font-size: 1.5rem; }
+    .month-nav-content-container .btn, .month-nav-content-container .form-select { font-size: 0.8rem; }
+    .day-game-item { flex-direction: column; align-items: flex-start; }
+    .day-game-item img { margin-bottom: 2px; width: 100%; height: auto; aspect-ratio: 16/10; }
+    .day-game-item .game-name { white-space: normal; }
+    .day-game-item .game-metacritic { margin-left: 0; margin-top: 2px; }
+    .day-number { font-size: 0.65rem; padding: 1px 2px;}
+}
