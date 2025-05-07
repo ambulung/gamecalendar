@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const apiKey = window.RAWG_API_KEY;
+    // API Key is no longer stored or used directly in client-side JS
 
     const calendarGrid = document.querySelector('.calendar-grid');
     const currentMonthYearDisplay = document.getElementById('currentMonthYear');
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchTimeout;
 
     let currentDate = new Date();
-    let gamesCache = {};
+    let gamesCache = {}; // Client-side caching can still be useful to reduce calls to your function
     let gamesByDay = {};
     let activeSlideshowIntervals = [];
 
@@ -26,12 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         "July", "August", "September", "October", "November", "December"];
 
     function init() {
-        if (!apiKey) {
-            displayError("API Key not found. Ensure config.js is loaded and contains your RAWG_API_KEY.");
-            loadingIndicator.style.display = 'none';
-            [prevMonthBtn, nextMonthBtn, todayBtn, goToDateBtn, gameSearchInput].forEach(el => el.disabled = true);
-            return;
-        }
+        // No API key check here anymore, as it's handled server-side
         setupEventListeners();
         populateMonthYearSelectors();
         loadDarkModePreference();
@@ -51,23 +46,19 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const toggleContainer = document.getElementById('darkModeToggleContainer');
         if(toggleContainer) {
-            darkModeToggle.addEventListener('change', toggleDarkMode); // Listen to change on checkbox
-            // Make container (icon area) also toggle the checkbox
+            darkModeToggle.addEventListener('change', toggleDarkMode);
             toggleContainer.addEventListener('click', (event) => {
-                // Prevent double toggling if the checkbox itself was the click target
-                if (event.target !== darkModeToggle) {
+                if (event.target !== darkModeToggle && event.target.parentNode !== darkModeToggle) {
                     darkModeToggle.checked = !darkModeToggle.checked;
-                    // Manually trigger the logic as if the checkbox 'change' event fired
                     toggleDarkMode(); 
                 }
             });
         }
 
-
         gameSearchInput.addEventListener('input', handleSearchInput);
         gameSearchInput.addEventListener('keydown', handleSearchKeyDown);
         document.addEventListener('click', (event) => {
-            if (!searchSuggestionsDiv.contains(event.target) && event.target !== gameSearchInput) {
+            if (searchSuggestionsDiv && !searchSuggestionsDiv.contains(event.target) && event.target !== gameSearchInput) {
                 searchSuggestionsDiv.style.display = 'none';
             }
         });
@@ -76,30 +67,22 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadDarkModePreference() {
         const isDarkMode = localStorage.getItem('darkMode') === 'true';
         darkModeToggle.checked = isDarkMode;
-        
         document.body.classList.toggle('dark-mode', isDarkMode);
-        document.body.classList.toggle('light-mode', !isDarkMode); // Explicitly set light-mode
-
+        document.body.classList.toggle('light-mode', !isDarkMode);
         updateDarkModeIcon(isDarkMode);
     }
 
     function toggleDarkMode() {
-        const isDarkMode = darkModeToggle.checked; // Get current state of the checkbox
-        
+        const isDarkMode = darkModeToggle.checked;
         document.body.classList.toggle('dark-mode', isDarkMode);
         document.body.classList.toggle('light-mode', !isDarkMode);
-        
         localStorage.setItem('darkMode', isDarkMode);
         updateDarkModeIcon(isDarkMode);
     }
 
     function updateDarkModeIcon(isDarkMode) {
         if (darkModeIconContainer) {
-            if (isDarkMode) {
-                darkModeIconContainer.innerHTML = '<i class="bi bi-sun-fill"></i>';
-            } else {
-                darkModeIconContainer.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
-            }
+            darkModeIconContainer.innerHTML = isDarkMode ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-stars-fill"></i>';
         }
     }
 
@@ -144,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             calendarGrid.appendChild(Object.assign(document.createElement('div'), { className: 'empty-day calendar-day' }));
         }
 
-        const gamesForMonth = await fetchGamesForMonth(year, month);
+        const gamesForMonth = await fetchGamesForMonth(year, month); // Calls the function that now uses Netlify func
         gamesByDay = {};
         if (gamesForMonth) {
             gamesForMonth.forEach(game => {
@@ -245,70 +228,146 @@ document.addEventListener('DOMContentLoaded', () => {
         const images = slideshowDiv.querySelectorAll('img');
         if (images.length === 0) return;
         let currentIndex = 0;
-        images[currentIndex].classList.add('active-slide');
+        if (images[currentIndex]) { // Check if the first image exists
+            images[currentIndex].classList.add('active-slide');
+        }
         if (intervalTime === 0 || images.length <= 1) return;
         const intervalId = setInterval(() => {
             if (!slideshowDiv.isConnected) { 
                 clearInterval(intervalId);
                 return;
             }
-            images[currentIndex].classList.remove('active-slide');
+            if (images[currentIndex]) images[currentIndex].classList.remove('active-slide');
             currentIndex = (currentIndex + 1) % images.length;
-            images[currentIndex].classList.add('active-slide');
+            if (images[currentIndex]) images[currentIndex].classList.add('active-slide');
         }, intervalTime);
         activeSlideshowIntervals.push(intervalId);
     }
 
+    // --- API Calls now go through Netlify Function ---
+
     async function fetchGamesForMonth(year, month) {
-        const cacheKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-        if (gamesCache[cacheKey]) return gamesCache[cacheKey];
-        const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-        const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(getDaysInMonth(year, month)).padStart(2, '0')}`;
-        const apiUrl = `https://api.rawg.io/api/games?key=${apiKey}&dates=${startDate},${endDate}&ordering=-metacritic,-added&page_size=40`;
+        const cacheKey = `month-${year}-${month}`;
+        if (gamesCache[cacheKey]) {
+            console.log("Client: Serving month data from cache:", cacheKey);
+            return gamesCache[cacheKey];
+        }
+
+        const params = new URLSearchParams({
+            year: year.toString(),
+            month: month.toString(), // Send 0-indexed month
+            ordering: '-metacritic,-added', // Default ordering
+            pageSize: '40' // Default page size
+        });
+        const functionUrl = `/.netlify/functions/getGames?${params.toString()}`;
+        console.log("Client: Fetching month data from Netlify function:", functionUrl);
+
         try {
-            const response = await fetch(apiUrl);
-            if (!response.ok) { handleApiError(response, "Error fetching games for month"); return null; }
+            const response = await fetch(functionUrl);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: "Failed to parse error from function." }));
+                console.error("Error from Netlify function (fetchGamesForMonth):", response.status, errorData);
+                displayError(`Error fetching games: ${errorData.error || `Server error ${response.status}`}`);
+                return null;
+            }
             const data = await response.json();
-            gamesCache[cacheKey] = data.results;
-            return data.results;
+            console.log("Client: Received month data:", data);
+            if (data.results) { // Assuming function returns RAWG-like structure
+                gamesCache[cacheKey] = data.results;
+                return data.results;
+            } else {
+                console.error("Client: Unexpected data structure from function (fetchGamesForMonth):", data);
+                displayError("Received unexpected data from game service.");
+                return null;
+            }
         } catch (error) {
-            console.error("Network error fetching games for month:", error);
+            console.error("Client: Network error calling Netlify function (fetchGamesForMonth):", error);
             displayError("Could not connect to game service. Check network or try later.");
             return null;
         }
     }
 
-    function handleSearchInput() {
-        clearTimeout(searchTimeout);
-        const query = gameSearchInput.value.trim();
-        if (query.length < 3) { searchSuggestionsDiv.style.display = 'none'; searchSuggestionsDiv.innerHTML = ''; return; }
-        searchSuggestionsDiv.innerHTML = '<div class="list-group-item disabled">Searching...</div>';
-        searchSuggestionsDiv.style.display = 'block';
-        searchTimeout = setTimeout(() => fetchSearchSuggestions(query), 400);
-    }
-
-    function handleSearchKeyDown(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            const query = gameSearchInput.value.trim();
-            searchSuggestionsDiv.style.display = 'none';
-            if (query) findAndGoToGame(query);
-        }
-    }
-
     async function fetchSearchSuggestions(query) {
-        const apiUrl = `https://api.rawg.io/api/games?key=${apiKey}&search=${encodeURIComponent(query)}&page_size=6&search_precise=true`;
+        const params = new URLSearchParams({
+            searchQuery: query,
+            pageSize: '6',
+            searchPrecise: 'true'
+        });
+        const functionUrl = `/.netlify/functions/getGames?${params.toString()}`;
+        console.log("Client: Fetching search suggestions from Netlify function:", functionUrl);
+
         try {
-            const response = await fetch(apiUrl);
-            if (!response.ok) { searchSuggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Error fetching.</div>'; return; }
+            const response = await fetch(functionUrl);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: "Failed to parse error from function." }));
+                console.error("Error from Netlify function (fetchSearchSuggestions):", response.status, errorData);
+                searchSuggestionsDiv.innerHTML = `<div class="list-group-item text-danger">Error: ${errorData.error || `Server error ${response.status}`}</div>`;
+                return;
+            }
             const data = await response.json();
-            displaySearchSuggestions(data.results);
+            console.log("Client: Received search suggestions:", data);
+            if (data.results) {
+                displaySearchSuggestions(data.results);
+            } else {
+                 console.error("Client: Unexpected data structure from function (fetchSearchSuggestions):", data);
+                searchSuggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Unexpected data.</div>';
+            }
         } catch (error) {
-            console.error("Error fetching search suggestions:", error);
+            console.error("Client: Network error calling Netlify function (fetchSearchSuggestions):", error);
             searchSuggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Network error.</div>';
         }
     }
 
+    async function findAndGoToGame(gameName, releaseDateStr, gameSlug) {
+        showLoading(true);
+        errorMessagesDiv.style.display = 'none';
+        let gameToNavigate = { name: gameName, released: releaseDateStr, slug: gameSlug };
+
+        if (!releaseDateStr && gameName) { // If only name, need to fetch details for release date
+            const params = new URLSearchParams({
+                searchQuery: gameName,
+                pageSize: '1',
+                searchExact: 'true' // Try for an exact match to get the specific game
+            });
+            const functionUrl = `/.netlify/functions/getGames?${params.toString()}`;
+            console.log("Client: Fetching game details from Netlify function:", functionUrl);
+
+            try {
+                const response = await fetch(functionUrl);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: "Failed to parse error from function." }));
+                    throw new Error(errorData.error || `Server error ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.results && data.results.length > 0) {
+                    gameToNavigate = data.results[0]; // Update with fetched details
+                } else {
+                    throw new Error('Game not found in precise search via function.');
+                }
+            } catch (error) {
+                console.error("Client: Error fetching game for navigation via function:", error);
+                displayError(`Could not find details for "${gameName}".`);
+                showLoading(false); return;
+            }
+        }
+        
+        if (gameToNavigate && gameToNavigate.released) {
+            try {
+                const releaseDate = new Date(gameToNavigate.released + 'T00:00:00');
+                if (isNaN(releaseDate.getTime())) throw new Error("Invalid release date.");
+                currentDate = new Date(releaseDate.getFullYear(), releaseDate.getMonth(), 1);
+                await renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+            } catch(e) {
+                 console.error("Client: Error processing release date for navigation:", e);
+                 displayError(`Error processing release date for "${gameToNavigate.name}".`);
+            }
+        } else {
+            displayError(`"${gameToNavigate.name}" found, but no specific release date available for navigation.`);
+        }
+        showLoading(false);
+    }
+
+    // --- Utility Functions ---
     function displaySearchSuggestions(suggestions) {
         searchSuggestionsDiv.innerHTML = '';
         if (!suggestions || suggestions.length === 0) {
@@ -324,44 +383,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 gameSearchInput.value = game.name;
                 searchSuggestionsDiv.style.display = 'none';
+                // Pass along potentially fetched slug and release date to avoid re-fetch if possible
                 findAndGoToGame(game.name, game.released, game.slug);
             });
             searchSuggestionsDiv.appendChild(item);
         });
-    }
-
-    async function findAndGoToGame(gameName, releaseDateStr, gameSlug) {
-        showLoading(true);
-        errorMessagesDiv.style.display = 'none';
-        let gameToNavigate = { name: gameName, released: releaseDateStr, slug: gameSlug };
-        if (!releaseDateStr && gameName) {
-            const apiUrl = `https://api.rawg.io/api/games?key=${apiKey}&search=${encodeURIComponent(gameName)}&page_size=1&search_exact=true`;
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Game not found for navigation details');
-                const data = await response.json();
-                if (data.results && data.results.length > 0) gameToNavigate = data.results[0];
-                else throw new Error('Game not found in precise search');
-            } catch (error) {
-                console.error("Error fetching game for navigation:", error);
-                displayError(`Could not find details for "${gameName}".`);
-                showLoading(false); return;
-            }
-        }
-        if (gameToNavigate && gameToNavigate.released) {
-            try {
-                const releaseDate = new Date(gameToNavigate.released + 'T00:00:00');
-                if (isNaN(releaseDate.getTime())) throw new Error("Invalid release date.");
-                currentDate = new Date(releaseDate.getFullYear(), releaseDate.getMonth(), 1);
-                await renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
-            } catch(e) {
-                 console.error("Error processing release date for navigation:", e);
-                 displayError(`Error processing release date for "${gameToNavigate.name}".`);
-            }
-        } else {
-            displayError(`"${gameToNavigate.name}" found, but no specific release date available.`);
-        }
-        showLoading(false);
     }
 
     function showLoading(isLoading) {
@@ -374,14 +400,5 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMessagesDiv.style.display = 'block';
     }
     
-    async function handleApiError(response, contextMessage) {
-        let errorDetail = response.statusText;
-        try { const errorData = await response.json(); if (errorData && errorData.detail) errorDetail = errorData.detail; }
-        catch (e) { /* ignore */ }
-        console.error(`${contextMessage}: ${response.status} ${errorDetail}`);
-        if (response.status === 401) displayError(`API Key Error: ${errorDetail}. Check config.js.`);
-        else displayError(`${contextMessage}: ${response.status} ${errorDetail}.`);
-    }
-
     init();
 });
