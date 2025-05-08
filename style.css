@@ -26,7 +26,7 @@
     --sub-header-bg: var(--palette-white);
     --sub-header-text: var(--palette-darkest);
     --sub-header-border: #e0e0e0;
-    --day-game-item-text: var(--palette-darkest); /* Text color for game items */
+    --day-game-item-text: var(--palette-darkest);
     --scrollbar-thumb: #b0bec5;
     --scrollbar-track: transparent;
     --btn-primary-bg: var(--palette-accent);
@@ -36,7 +36,7 @@
     --btn-outline-primary-hover-bg: var(--palette-accent);
     --btn-outline-primary-hover-text: var(--palette-white);
     --form-control-bg: var(--palette-white);
-    --content-wrapper-overlay-light: rgba(245, 245, 245, 0.65); /* Grid overlay */
+    --content-wrapper-overlay-light: rgba(245, 245, 245, 0.65);
     --day-number-text-light: var(--palette-darkest);
     --day-number-text-shadow-light: none;
     --day-game-item-text-shadow-light: none;
@@ -52,7 +52,7 @@ body.dark-mode {
     --sub-header-bg: #22272F;
     --sub-header-text: var(--palette-light);
     --sub-header-border: #30363d;
-    --day-game-item-text: var(--palette-light); /* Text color for game items */
+    --day-game-item-text: var(--palette-light);
     --scrollbar-thumb: var(--palette-medium-dark);
     --scrollbar-track: transparent;
     --btn-primary-bg: var(--palette-accent);
@@ -62,7 +62,7 @@ body.dark-mode {
     --btn-outline-primary-hover-bg: var(--palette-accent);
     --btn-outline-primary-hover-text: var(--palette-darkest);
     --form-control-bg: #373e47;
-    --content-wrapper-overlay-dark: rgba(var(--palette-darkest-rgb), 0.75); /* Grid overlay */
+    --content-wrapper-overlay-dark: rgba(var(--palette-darkest-rgb), 0.75);
     --day-number-text-dark: var(--palette-light);
     --day-number-text-shadow-dark: none;
     --day-game-item-text-shadow-dark: none;
@@ -72,7 +72,7 @@ body.dark-mode {
 html, body {
     margin: 0;
     padding: 0;
-    height: 100%;
+    height: 100%; /* Ensure body can be a reference for full height if needed */
 }
 
 body {
@@ -80,6 +80,7 @@ body {
     color: var(--calendar-text);
     transition: background-color 0.3s, color 0.3s;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* No body padding-top needed if headers are part of normal flow or sticky */
 }
 
 /* Site Header Styles */
@@ -88,6 +89,8 @@ body {
     padding: 0.5rem 0;
     height: 60px;
     border-bottom: 1px solid #2a2a2a;
+    /* .sticky-top from Bootstrap handles position: sticky, top: 0, z-index: 1020 */
+    /* We might need to increase z-index if other sticky elements conflict */
 }
 .header-container {
     display: flex; align-items: center; justify-content: space-between;
@@ -160,7 +163,7 @@ body {
 .header-nav-item.form-check:hover #darkModeIconContainer i {
     color: var(--palette-accent);
 }
-.form-check-input { /* Header dark mode toggle switch */
+.form-check-input { /* For main header toggle */
     background-color: var(--palette-medium-dark);
     border-color: var(--palette-medium-dark);
     cursor: pointer;
@@ -173,33 +176,33 @@ body {
     box-shadow: 0 0 0 0.25rem rgba(var(--palette-accent-rgb), 0.25);
 }
 
-
 /* Month Navigation Sub-Header (Full Width) */
 .month-navigation-header {
     background-color: var(--sub-header-bg);
     color: var(--sub-header-text);
     border-bottom: 1px solid var(--sub-header-border);
     transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-    padding: 0;
+    padding: 0; /* Outer div is full width, no padding */
 }
 .sticky-top-subheader { /* Making the sub-header sticky below the main header */
     position: sticky;
     top: 60px; /* Height of the .site-header */
-    z-index: 1020; /* Standard sticky z-index, below site-header */
+    z-index: 1020; /* Below .site-header's default sticky-top z-index (1020) if site-header is also sticky but higher. Bootstrap .sticky-top is 1020 */
+                  /* If .site-header uses default Bootstrap .sticky-top, this needs to be lower or .site-header needs to be higher */
 }
 .site-header.sticky-top {
-    z-index: 1021; /* Ensure main header is on top */
+    z-index: 1021; /* Ensure main header is on top of sub-header if both are sticky */
 }
 .month-nav-content-container { /* Inner container to center the content */
-    max-width: 1600px;
+    max-width: 1600px; /* Or your preferred content width, e.g., same as .header-container */
     margin: 0 auto;
     /* Bootstrap .p-3 class in HTML handles padding */
 }
 /* Controls within month-navigation-header */
 .month-navigation-header .form-control,
 .month-navigation-header .form-select {
-    background-color: var(--form-control-bg);
-    color: var(--calendar-text);
+    background-color: var(--form-control-bg); /* Use general form control bg based on theme */
+    color: var(--calendar-text); /* Use main calendar text color for forms */
     border-color: var(--calendar-border);
 }
 .month-navigation-header .btn-primary {
@@ -239,20 +242,19 @@ body.dark-mode .month-navigation-header .btn-outline-secondary:hover {
     color: var(--sub-header-text);
 }
 
+
 /* Main Calendar Container - now directly after headers */
 .calendar-container {
     max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
-    padding-top: 1rem;
+    padding-top: 1rem; /* Space below the (potentially sticky) sub-header */
     padding-bottom: 1rem;
 }
 
-/* Calendar Grid Styles (Visible >= md breakpoint) */
+/* Calendar Grid and Day Cell styles (These should remain largely the same) */
 .calendar-grid {
-    /* display: grid; -- Applied via .d-md-grid */
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
     border: 1px solid var(--calendar-border); padding: 5px;
     border-radius: 0.25rem;
 }
@@ -312,71 +314,33 @@ body.dark-mode .day-number {
 body:not(.dark-mode) .calendar-day.today .day-number {
     color: var(--palette-white);
 }
-.day-games-list { /* For grid view scroll */
+.day-games-list {
     flex-grow: 1; overflow-y: auto; overflow-x: hidden; min-height: 0;
 }
 .day-games-list::-webkit-scrollbar { width: 5px; }
 .day-games-list::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 .day-games-list::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb); border-radius: 10px; }
 .day-games-list { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
-
-
-/* Calendar List View Styles (Visible < md breakpoint) */
-.calendar-list {
-    /* display: block; -- Applied via .d-md-none */
-}
-.list-day-item {
-    background-color: var(--sub-header-bg);
-    border: 1px solid var(--calendar-border);
-    border-radius: 0.375rem;
-    margin-bottom: 1rem;
-    padding: 0.75rem 1rem;
-    color: var(--calendar-text);
-}
-body.dark-mode .list-day-item {
-     background-color: var(--sub-header-bg);
-     border-color: var(--sub-header-border);
-}
-.list-day-header {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--calendar-border);
-    color: var(--calendar-text);
-}
-body.dark-mode .list-day-header {
-    border-bottom-color: var(--sub-header-border);
-    color: var(--calendar-text);
-}
-.list-day-item .day-game-item { /* Overrides for list view items */
-    padding: 5px 2px;
-    margin-bottom: 5px;
-    font-size: 0.8rem;
-}
-.list-day-item .day-game-item:last-child { margin-bottom: 0; }
-.list-day-item .day-game-item img { width: 48px; height: 30px; }
-.list-day-item .day-game-item .game-name {
-    white-space: normal; overflow: visible; text-overflow: clip;
-}
-
-
-/* Day Game Item shared styles (used by both grid and list) */
 .day-game-item {
     display: flex; align-items: center; padding: 3px; margin-bottom: 3px;
-    border-radius: 3px; background-color: transparent;
-    color: var(--day-game-item-text); text-shadow: var(--day-game-item-text-shadow-dark);
-    cursor: pointer; text-decoration: none; transition: background-color 0.15s ease-in-out;
+    border-radius: 3px;
+    background-color: transparent;
+    font-size: 0.7rem;
+    color: var(--day-game-item-text);
+    text-shadow: var(--day-game-item-text-shadow-dark);
+    cursor: pointer; text-decoration: none;
+    transition: background-color 0.15s ease-in-out;
 }
-body:not(.dark-mode) .day-game-item { text-shadow: var(--day-game-item-text-shadow-light); }
-.day-game-item:last-child { /* Specificity might be needed if list override is stronger */
-    /* margin-bottom: 1px; */
+body:not(.dark-mode) .day-game-item {
+    text-shadow: var(--day-game-item-text-shadow-light);
 }
+.day-game-item:last-child { margin-bottom: 1px; }
 .day-game-item:hover { background-color: rgba(0,0,0,0.08); }
 body.dark-mode .day-game-item:hover { background-color: rgba(255,255,255,0.05); }
 .day-game-item img {
     width: 32px; height: 20px; object-fit: cover; margin-right: 5px;
-    border-radius: 2px; flex-shrink: 0; background-color: var(--palette-medium-dark);
+    border-radius: 2px; flex-shrink: 0;
+    background-color: var(--palette-medium-dark);
 }
 body:not(.dark-mode) .day-game-item img { background-color: #e0e0e0; }
 .day-game-item .game-name {
@@ -387,7 +351,6 @@ body:not(.dark-mode) .day-game-item img { background-color: #e0e0e0; }
     font-size: 0.65rem; font-weight: bold; padding: 1px 3px;
     border-radius: 2px; margin-left: 4px; color: white; flex-shrink: 0; text-shadow: none;
 }
-
 
 /* Alert Messages, Loading, Footer */
 .alert-danger { background-color: #f8d7da; border-color: #f5c2c7; color: #842029; }
@@ -406,9 +369,9 @@ footer a:hover { text-decoration: underline; }
     .header-logo { font-size: 1.3rem; margin-right: 1rem; }
     .header-search-container { max-width: 500px; }
 }
-@media (max-width: 768px) { /* md breakpoint */
+@media (max-width: 768px) {
     .site-header { height: 56px; }
-    .sticky-top-subheader { top: 56px; }
+    .sticky-top-subheader { top: 56px; } /* Match new main header height */
 
     .header-logo { display: none; }
     .header-search-container { margin-left: 0.5rem; margin-right: 0.5rem; max-width: none; }
@@ -422,23 +385,17 @@ footer a:hover { text-decoration: underline; }
     .month-nav-content-container .row > div:last-child { margin-bottom: 0; }
     .month-nav-content-container .d-flex.justify-content-md-end { justify-content: center !important; }
 
-    /* List view specific tweaks */
-    .list-day-item { padding: 0.6rem 0.8rem; }
-    .list-day-header { font-size: 1rem; }
-    .list-day-item .day-game-item { font-size: 0.75rem; }
-    .list-day-item .day-game-item img { width: 40px; height: 25px; }
+    .day-name { font-size: 0.75rem; padding: 0.3rem 0.1rem; }
+    .day-game-item { font-size: 0.65rem; }
+    .day-game-item img { width: 28px; height: 18px; }
+    .day-number { font-size: 0.7rem; }
 }
-@media (max-width: 576px) { /* sm breakpoint */
+@media (max-width: 576px) {
     #currentMonthYear { font-size: 1.5rem; }
     .month-nav-content-container .btn, .month-nav-content-container .form-select { font-size: 0.8rem; }
-    /* Game item stacking in list view */
-    .list-day-item .day-game-item {
-        flex-direction: column; align-items: flex-start;
-    }
-    .list-day-item .day-game-item img {
-         margin-bottom: 4px; width: 100%; height: auto; aspect-ratio: 16/10; /* Full width image */
-    }
-     .list-day-item .day-game-item .game-metacritic {
-        margin-left: 0; margin-top: 3px; /* Adjust spacing when stacked */
-    }
+    .day-game-item { flex-direction: column; align-items: flex-start; }
+    .day-game-item img { margin-bottom: 2px; width: 100%; height: auto; aspect-ratio: 16/10; }
+    .day-game-item .game-name { white-space: normal; }
+    .day-game-item .game-metacritic { margin-left: 0; margin-top: 2px; }
+    .day-number { font-size: 0.65rem; padding: 1px 2px;}
 }
