@@ -397,7 +397,7 @@ footer a:hover { text-decoration: underline; }
     .day-game-item img { margin-bottom: 2px; width: 100%; height: auto; aspect-ratio: 16/10; }
     .day-game-item .game-name { white-space: normal; }
     .day-game-item .game-metacritic { margin-left: 0; margin-top: 2px; }
-    .day-number { font-size: 0.65rem; padding: 1px 2px;} /* This will be overridden by more specific/later styles below */
+    /* .day-number styling from before, will be mostly overridden by more specific one below */
 
     /* ===== MOBILE LIST VIEW FOR CALENDAR (added for list view transformation) ===== */
     .calendar-grid {
@@ -415,7 +415,7 @@ footer a:hover { text-decoration: underline; }
         height: auto; /* Allow height to be determined by content */
         padding-bottom: 0; /* Remove square aspect ratio hack */
         margin-bottom: 1rem; /* Space between day "list items" */
-        /* border, border-radius, overflow, position are inherited and should work as intended */
+        /* border, border-radius, overflow, position:relative are inherited and should work as intended */
     }
 
     .calendar-day:last-child {
@@ -427,14 +427,16 @@ footer a:hover { text-decoration: underline; }
         display: none;
     }
 
-    /* Adjust day-content-wrapper padding for list items */
+    /* Adjust day-content-wrapper for list items */
     .day-content-wrapper {
+        position: static; /* <<< KEY CHANGE HERE: Was absolute, now static for normal flow */
+        /* display: flex; flex-direction: column; are inherited and okay */
         padding: 0.75rem; /* Uniform padding for the content of each day list item */
-         /* position: absolute, top:0, etc. from general styles will make it fill the auto-height .calendar-day */
+        /* background-color transitions and themeing are inherited */
+        /* z-index is no longer applicable in the same way as position:static */
     }
 
     /* Adjust day number to act more like a header for the list item */
-    /* These rules will override the .day-number { font-size: 0.65rem; ... } due to order */
     .day-number {
         align-self: flex-start; /* Position at the start of the flex column (day-content-wrapper) */
         display: inline-block; /* So background/padding applies tightly */
@@ -447,6 +449,7 @@ footer a:hover { text-decoration: underline; }
         text-shadow: none; /* Remove default text shadow */
         border-radius: 0; /* No border radius by default */
         line-height: 1.3;
+        /* flex-shrink: 0 is inherited and fine */
     }
 
     /* Override for 'today' styling on day number - make it distinct */
@@ -455,10 +458,9 @@ footer a:hover { text-decoration: underline; }
         color: var(--palette-darkest); /* Ensure good contrast on accent (will be overridden by :not(.dark-mode) rule if light) */
         padding: 0.2rem 0.4rem; /* Restore some padding for the chip look */
         border-radius: 3px; /* Restore chip border radius */
-        /* font-size (1.1rem) is inherited from the general .day-number style above */
-        /* display: inline-block is inherited */
     }
     /* The existing body:not(.dark-mode) .calendar-day.today .day-number rule will correctly set color for light mode 'today' */
 
-    /* .day-game-item styles for stacking (flex-direction: column, etc.) are already present above and suitable for list items */
+    /* .day-games-list styling (flex-grow:1, overflow-y:auto) from general styles should work correctly now
+       to make it fill available space within the statically positioned day-content-wrapper. */
 }
