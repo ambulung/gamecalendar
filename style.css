@@ -80,7 +80,6 @@ body {
     color: var(--calendar-text);
     transition: background-color 0.3s, color 0.3s;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    /* No body padding-top needed if headers are part of normal flow or sticky */
 }
 
 /* Site Header Styles */
@@ -89,8 +88,6 @@ body {
     padding: 0.5rem 0;
     height: 60px;
     border-bottom: 1px solid #2a2a2a;
-    /* .sticky-top from Bootstrap handles position: sticky, top: 0, z-index: 1020 */
-    /* We might need to increase z-index if other sticky elements conflict */
 }
 .header-container {
     display: flex; align-items: center; justify-content: space-between;
@@ -182,27 +179,25 @@ body {
     color: var(--sub-header-text);
     border-bottom: 1px solid var(--sub-header-border);
     transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-    padding: 0; /* Outer div is full width, no padding */
+    padding: 0;
 }
-.sticky-top-subheader { /* Making the sub-header sticky below the main header */
+.sticky-top-subheader {
     position: sticky;
     top: 60px; /* Height of the .site-header */
-    z-index: 1020; /* Below .site-header's default sticky-top z-index (1020) if site-header is also sticky but higher. Bootstrap .sticky-top is 1020 */
-                  /* If .site-header uses default Bootstrap .sticky-top, this needs to be lower or .site-header needs to be higher */
+    z-index: 1020;
 }
 .site-header.sticky-top {
     z-index: 1021; /* Ensure main header is on top of sub-header if both are sticky */
 }
-.month-nav-content-container { /* Inner container to center the content */
-    max-width: 1600px; /* Or your preferred content width, e.g., same as .header-container */
+.month-nav-content-container {
+    max-width: 1600px;
     margin: 0 auto;
-    /* Bootstrap .p-3 class in HTML handles padding */
 }
 /* Controls within month-navigation-header */
 .month-navigation-header .form-control,
 .month-navigation-header .form-select {
-    background-color: var(--form-control-bg); /* Use general form control bg based on theme */
-    color: var(--calendar-text); /* Use main calendar text color for forms */
+    background-color: var(--form-control-bg);
+    color: var(--calendar-text);
     border-color: var(--calendar-border);
 }
 .month-navigation-header .btn-primary {
@@ -243,16 +238,16 @@ body.dark-mode .month-navigation-header .btn-outline-secondary:hover {
 }
 
 
-/* Main Calendar Container - now directly after headers */
+/* Main Calendar Container */
 .calendar-container {
     max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
-    padding-top: 1rem; /* Space below the (potentially sticky) sub-header */
+    padding-top: 1rem;
     padding-bottom: 1rem;
 }
 
-/* Calendar Grid and Day Cell styles (These should remain largely the same) */
+/* Calendar Grid and Day Cell styles */
 .calendar-grid {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
     border: 1px solid var(--calendar-border); padding: 5px;
@@ -386,6 +381,7 @@ footer a:hover { text-decoration: underline; }
     .month-nav-content-container .d-flex.justify-content-md-end { justify-content: center !important; }
 
     .day-name { font-size: 0.75rem; padding: 0.3rem 0.1rem; }
+    /* .day-game-item font-size may be overridden below if screen is also < 576px */
     .day-game-item { font-size: 0.65rem; }
     .day-game-item img { width: 28px; height: 18px; }
     .day-number { font-size: 0.7rem; }
@@ -393,13 +389,8 @@ footer a:hover { text-decoration: underline; }
 @media (max-width: 576px) {
     #currentMonthYear { font-size: 1.5rem; }
     .month-nav-content-container .btn, .month-nav-content-container .form-select { font-size: 0.8rem; }
-    .day-game-item { flex-direction: column; align-items: flex-start; }
-    .day-game-item img { margin-bottom: 2px; width: 100%; height: auto; aspect-ratio: 16/10; }
-    .day-game-item .game-name { white-space: normal; }
-    .day-game-item .game-metacritic { margin-left: 0; margin-top: 2px; }
-    /* .day-number styling from before, will be mostly overridden by more specific one below */
 
-    /* ===== MOBILE LIST VIEW FOR CALENDAR (added for list view transformation) ===== */
+    /* ===== MOBILE LIST VIEW FOR CALENDAR (Transformation & Fixes) ===== */
     .calendar-grid {
         display: block; /* Change from grid to block for list stacking */
         border: none; /* Remove outer grid border */
@@ -429,10 +420,10 @@ footer a:hover { text-decoration: underline; }
 
     /* Adjust day-content-wrapper for list items */
     .day-content-wrapper {
-        position: static; /* <<< KEY CHANGE HERE: Was absolute, now static for normal flow */
-        /* display: flex; flex-direction: column; are inherited and okay */
+        position: static; /* KEY CHANGE: Was absolute, now static for normal flow */
         padding: 0.75rem; /* Uniform padding for the content of each day list item */
-        /* background-color transitions and themeing are inherited */
+        /* display: flex; flex-direction: column; are inherited and okay */
+        /* background-color transitions and theming are inherited */
         /* z-index is no longer applicable in the same way as position:static */
     }
 
@@ -454,13 +445,71 @@ footer a:hover { text-decoration: underline; }
 
     /* Override for 'today' styling on day number - make it distinct */
     .calendar-day.today .day-number {
-        background-color: var(--calendar-today-border); /* Highlight background */
-        color: var(--palette-darkest); /* Ensure good contrast on accent (will be overridden by :not(.dark-mode) rule if light) */
-        padding: 0.2rem 0.4rem; /* Restore some padding for the chip look */
-        border-radius: 3px; /* Restore chip border radius */
+        background-color: var(--calendar-today-border);
+        color: var(--palette-darkest) !important; /* Ensure dark text on accent bg, even in dark mode for today */
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
     }
-    /* The existing body:not(.dark-mode) .calendar-day.today .day-number rule will correctly set color for light mode 'today' */
+    body:not(.dark-mode) .calendar-day.today .day-number {
+        color: var(--palette-white) !important; /* White text on accent for light mode today */
+    }
 
-    /* .day-games-list styling (flex-grow:1, overflow-y:auto) from general styles should work correctly now
-       to make it fill available space within the statically positioned day-content-wrapper. */
+
+    /* --- REVISED STYLES FOR GAME ITEMS IN LIST VIEW --- */
+    .day-game-item {
+        display: flex; /* Ensure it's still a flex container */
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 8px; /* Add some internal padding to the item */
+        margin-bottom: 8px; /* Space between game items */
+        border-radius: 4px; /* Optional: round corners of the item */
+        background-color: rgba(0,0,0,0.03); /* Faint background to distinguish items */
+        /* text-shadow from general rule still applies */
+        font-size: inherit; /* Reset font-size from .day-game-item (0.65rem) at 768px breakpoint */
+    }
+    body.dark-mode .day-game-item {
+        background-color: rgba(255,255,255,0.03);
+    }
+    .day-game-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .day-game-item img {
+        width: 100%;         /* Image takes full width of the .day-game-item */
+        max-height: 100px;   /* Limit the image's maximum height. Adjust 100px as needed. */
+        object-fit: cover;   /* Ensures image covers the 100px height, cropping if necessary, maintaining aspect ratio. */
+        border-radius: 3px;  /* Rounded corners for the image */
+        margin-bottom: 8px;  /* Increased space between image and game name */
+        margin-right: 0;     /* Reset from general styles */
+        background-color: var(--palette-medium-dark); /* Fallback bg for image loading */
+        flex-shrink: 0;      /* Already there, but good to confirm */
+    }
+    body:not(.dark-mode) .day-game-item img {
+        background-color: #e0e0e0;
+    }
+
+
+    .day-game-item .game-name {
+        white-space: normal;   /* Allow text to wrap */
+        overflow: visible;     /* Ensure text isn't cut off if it wraps */
+        text-overflow: clip;   /* Standard for wrapped text */
+        font-size: 0.85rem;    /* Slightly larger for better readability */
+        font-weight: 500;      /* Make it a bit bolder */
+        line-height: 1.3;
+        color: var(--day-game-item-text); /* Ensure text color is applied */
+        margin-bottom: 4px;    /* Space between name and metacritic */
+        display: block;        /* Ensure it takes up block space for proper layout */
+        width: 100%;           /* Allow it to use full width for wrapping if needed */
+        flex-grow: 0;          /* Reset from general styles if it was causing issues */
+    }
+
+    .day-game-item .game-metacritic {
+        margin-left: 0;      /* Reset margin from desktop styles */
+        margin-top: 0;       /* Adjust based on game-name's margin-bottom */
+        font-size: 0.7rem;   /* Ensure it's not too large */
+        align-self: flex-start; /* Ensure it aligns to the start below the name */
+        /* padding, border-radius, color, text-shadow inherited */
+        flex-shrink: 0; /* Already there */
+    }
+    /* --- END OF REVISED MOBILE GAME ITEM STYLES --- */
 }
