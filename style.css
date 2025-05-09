@@ -405,125 +405,131 @@ footer a:hover { text-decoration: underline; }
 
     .calendar-day {
         width: 100%;
-        height: auto; /* Let content determine height */
-        padding-bottom: 0; /* Remove aspect ratio for list */
+        height: auto;
+        padding-bottom: 0;
         margin-bottom: 1rem;
-        overflow: visible; /* Allow content to be visible if it naturally overflows a bit */
-        min-height: 50px; /* Ensure even empty day cards have some height */
+        border: 1px solid var(--calendar-border); /* Keep border for day visibility */
+        border-radius: 0.25rem; /* Keep border radius */
+        background-color: var(--calendar-bg); /* Keep background */
+        overflow: visible; /* Allow content to determine size */
+        min-height: 60px; /* Ensure day cards have some base height */
     }
     .calendar-day:last-child {
         margin-bottom: 0;
     }
     .calendar-day.empty-day {
-        display: none; /* Hide empty days in list view for cleaner look */
+        display: none;
     }
 
     .day-content-wrapper {
-        position: static; /* Normal flow */
+        position: static;
         display: flex;
         flex-direction: column;
         padding: 0.75rem;
-        overflow: visible; /* Allow its content (game list) to determine height */
-        min-height: 40px; /* Ensure wrapper itself has some min height */
+        overflow: visible; /* Allow content to determine size */
+        background-color: var(--content-wrapper-overlay-light); /* Keep overlay */
     }
+    body.dark-mode .day-content-wrapper {
+        background-color: var(--content-wrapper-overlay-dark);
+    }
+    .calendar-day.empty-day .day-content-wrapper {
+        background-color: transparent !important;
+    }
+
 
     .day-number {
         align-self: flex-start;
         display: inline-block;
-        font-size: 1.1rem;
+        font-size: 1.2rem; /* Slightly larger day number */
         font-weight: bold;
-        padding: 0.1rem 0;
-        margin-bottom: 0.75rem; /* More space before game list */
-        color: var(--calendar-text);
-        text-shadow: none;
+        padding: 0.1rem 0.2rem; /* Small padding for clarity */
+        margin-bottom: 0.75rem;
+        color: var(--calendar-text) !important; /* Force color */
+        text-shadow: none !important;
+        background-color: transparent !important;
         flex-shrink: 0;
     }
     .calendar-day.today .day-number {
-        background-color: var(--calendar-today-border);
+        background-color: var(--calendar-today-border) !important;
         color: var(--palette-darkest) !important;
-        padding: 0.2rem 0.4rem;
-        border-radius: 3px;
+        padding: 0.2rem 0.5rem !important; /* More padding for today */
+        border-radius: 4px !important;
     }
     body:not(.dark-mode) .calendar-day.today .day-number {
         color: var(--palette-white) !important;
     }
 
     .day-games-list {
-        flex-grow: 0; /* Don't grow, take natural height */
-        flex-shrink: 1; /* Allow shrinking if needed, but should be based on content */
-        overflow-y: visible; /* Let content flow, no internal scroll for the list itself */
-        overflow-x: hidden;
+        flex-grow: 0;
+        flex-shrink: 1;
+        overflow: visible; /* Let content define height, no internal scroll */
         width: 100%;
-        min-height: 10px; /* Small min-height just to ensure it occupies some space if JS adds it */
     }
 
     /* --- STYLES FOR GAME ITEMS IN MOBILE LIST VIEW --- */
     .day-game-item {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 10px; /* Increased padding */
-        margin-bottom: 10px; /* Increased margin */
-        border-radius: 4px;
-        background-color: rgba(0,0,0,0.03);
-        font-size: inherit;
-        text-decoration: none;
-        color: var(--day-game-item-text);
-        min-height: 50px; /* Ensure game item itself has some height for text */
+        display: flex !important; /* Force display */
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        padding: 10px !important;
+        margin-bottom: 10px !important;
+        border-radius: 5px !important; /* Slightly more pronounced radius */
+        background-color: var(--palette-white) !important; /* Force a distinct BG for light mode */
+        border: 1px solid var(--palette-accent) !important; /* Add a border to clearly see the item */
+        color: var(--palette-darkest) !important; /* Force text color within item for light mode */
+        min-height: 100px; /* Ensure item itself has space */
     }
     body.dark-mode .day-game-item {
-        background-color: rgba(255,255,255,0.05); /* Slightly more contrast for dark mode items */
+        background-color: var(--palette-medium-dark) !important; /* Force a distinct BG for dark mode */
+        border: 1px solid var(--palette-accent) !important;
+        color: var(--palette-light) !important; /* Force text color for dark mode */
     }
     .day-game-item:last-child {
-        margin-bottom: 0;
+        margin-bottom: 0 !important;
     }
 
     .day-game-item img {
-        width: 100%;
-        max-height: 120px;
-        object-fit: cover;
-        border-radius: 3px;
-        margin-bottom: 10px; /* More space below image */
-        margin-right: 0;
-        background-color: var(--palette-medium-dark);
-        flex-shrink: 0;
-    }
-    body:not(.dark-mode) .day-game-item img {
-        background-color: #e0e0e0;
+        width: 100% !important;
+        max-height: 120px !important;
+        object-fit: cover !important;
+        border-radius: 3px !important;
+        margin-bottom: 10px !important;
+        background-color: #ccc !important; /* Very obvious placeholder */
+        flex-shrink: 0 !important;
     }
 
     .day-game-item .game-name {
-        display: block; /* Crucial for width and taking space */
-        width: 100%;    /* Take full width */
-        white-space: normal;
-        overflow: visible;
-        text-overflow: clip;
-        font-size: 0.95rem; /* Slightly larger */
-        font-weight: 600;   /* Bolder */
-        line-height: 1.4;
-        color: var(--day-game-item-text); /* Ensure color is set */
-        margin-bottom: 8px;
-        min-height: 1.4em; /* Ensure at least one line of text height */
-        /* For debugging text visibility: */
-        /* background-color: red; */ /* Uncomment to see the box */
-        /* border: 1px solid yellow; */ /* Uncomment to see the box */
-        flex-grow: 0; /* Do not grow or shrink in flex context of parent */
-        flex-shrink: 0;
-        flex-basis: auto;
+        display: block !important;
+        width: 100% !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        font-size: 1rem !important; /* Force a decent font size */
+        font-weight: 700 !important; /* Force bold */
+        line-height: 1.5 !important; /* Force line height */
+        color: #FF0000 !important; /* BRIGHT RED - IMPOSSIBLE TO MISS IF IT RENDERS */
+        background-color: #FFFF00 !important; /* BRIGHT YELLOW BACKGROUND */
+        padding: 5px !important; /* Add padding to see the box */
+        margin-bottom: 8px !important;
+        min-height: 2em !important; /* Ensure space for at least ~2 lines */
+        border: 2px dashed #00FF00 !important; /* BRIGHT GREEN DASHED BORDER */
+        z-index: 9999 !important; /* Bring to front */
+        position: relative !important; /* Ensure z-index applies */
     }
 
     .day-game-item .game-metacritic {
-        display: block; /* Ensure it takes space */
-        font-size: 0.8rem;
-        align-self: flex-start;
-        min-height: 1.2em; /* Ensure at least one line of text height */
-        /* For debugging text visibility: */
-        /* background-color: blue; */ /* Uncomment to see the box */
-        /* color: white !important; */ /* Uncomment to force color */
-        flex-grow: 0;
-        flex-shrink: 0;
-        flex-basis: auto;
-        /* General styles for padding, color, etc. should apply */
+        display: block !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        line-height: 1.4 !important;
+        align-self: flex-start !important;
+        color: #0000FF !important; /* BRIGHT BLUE */
+        background-color: #00FFFF !important; /* BRIGHT CYAN BACKGROUND */
+        padding: 3px !important;
+        min-height: 1.5em !important;
+        border: 2px dotted #FF00FF !important; /* BRIGHT MAGENTA DOTTED BORDER */
+        z-index: 9998 !important;
+        position: relative !important;
     }
     /* --- END OF MOBILE GAME ITEM STYLES --- */
 }
