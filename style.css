@@ -381,72 +381,67 @@ footer a:hover { text-decoration: underline; }
     .month-nav-content-container .d-flex.justify-content-md-end { justify-content: center !important; }
 
     .day-name { font-size: 0.75rem; padding: 0.3rem 0.1rem; }
-    /* .day-game-item font-size may be overridden below if screen is also < 576px */
-    .day-game-item { font-size: 0.65rem; }
-    .day-game-item img { width: 28px; height: 18px; }
-    .day-number { font-size: 0.7rem; }
+    .day-game-item { font-size: 0.65rem; } /* Will be overridden by more specific rules if screen is also < 576px */
+    .day-game-item img { width: 28px; height: 18px; } /* Will be overridden by more specific rules if screen is also < 576px */
+    .day-number { font-size: 0.7rem; } /* Will be overridden by more specific rules if screen is also < 576px */
 }
+
 @media (max-width: 576px) {
     #currentMonthYear { font-size: 1.5rem; }
     .month-nav-content-container .btn, .month-nav-content-container .form-select { font-size: 0.8rem; }
 
     /* ===== MOBILE LIST VIEW FOR CALENDAR (Transformation & Fixes) ===== */
     .calendar-grid {
-        display: block; /* Change from grid to block for list stacking */
-        border: none; /* Remove outer grid border */
-        padding: 0; /* Remove outer grid padding */
+        display: block;
+        border: none;
+        padding: 0;
     }
 
     .day-name {
-        display: none; /* Hide "Sun, Mon, Tue..." headers */
+        display: none;
     }
 
     .calendar-day {
         width: 100%;
-        height: auto; /* Allow height to be determined by content */
-        padding-bottom: 0; /* Remove square aspect ratio hack */
-        margin-bottom: 1rem; /* Space between day "list items" */
-        /* border, border-radius, overflow, position:relative are inherited and should work as intended */
+        height: auto;
+        padding-bottom: 0;
+        margin-bottom: 1rem;
+        /* border, border-radius, overflow, position:relative are inherited */
+        /* background-color is inherited from general .calendar-day rule */
     }
-
     .calendar-day:last-child {
-        margin-bottom: 0; /* No margin for the last item in the list */
+        margin-bottom: 0;
     }
-
-    /* Hide calendar days that are placeholders (not part of the current month) */
     .calendar-day.empty-day {
         display: none;
     }
 
-    /* Adjust day-content-wrapper for list items */
     .day-content-wrapper {
-        position: static; /* KEY CHANGE: Was absolute, now static for normal flow */
-        padding: 0.75rem; /* Uniform padding for the content of each day list item */
-        /* display: flex; flex-direction: column; are inherited and okay */
-        /* background-color transitions and theming are inherited */
-        /* z-index is no longer applicable in the same way as position:static */
+        position: static; /* Ensures it contributes to parent's auto height */
+        display: flex; /* Keep as flex for internal alignment */
+        flex-direction: column; /* Stack day-number and day-games-list vertically */
+        padding: 0.75rem;
+        /* background-color var(--content-wrapper-overlay-...) is inherited */
+        /* z-index is not needed as it's static */
     }
 
-    /* Adjust day number to act more like a header for the list item */
     .day-number {
-        align-self: flex-start; /* Position at the start of the flex column (day-content-wrapper) */
-        display: inline-block; /* So background/padding applies tightly */
-        font-size: 1.1rem; /* Larger font for day number "header" */
+        align-self: flex-start;
+        display: inline-block;
+        font-size: 1.1rem;
         font-weight: bold;
-        padding: 0.1rem 0; /* Minimal padding for non-highlighted days */
-        margin-bottom: 0.5rem; /* Space below the day number, before games */
-        background-color: transparent; /* Default: no background */
-        color: var(--calendar-text); /* Use theme's text color */
-        text-shadow: none; /* Remove default text shadow */
-        border-radius: 0; /* No border radius by default */
+        padding: 0.1rem 0;
+        margin-bottom: 0.5rem;
+        background-color: transparent;
+        color: var(--calendar-text);
+        text-shadow: none;
+        border-radius: 0;
         line-height: 1.3;
-        /* flex-shrink: 0 is inherited and fine */
+        flex-shrink: 0; /* Ensure it doesn't shrink if day-games-list tries to grow excessively */
     }
-
-    /* Override for 'today' styling on day number - make it distinct */
     .calendar-day.today .day-number {
         background-color: var(--calendar-today-border);
-        color: var(--palette-darkest) !important; /* Ensure dark text on accent bg, even in dark mode for today */
+        color: var(--palette-darkest) !important; /* Dark text on accent for today */
         padding: 0.2rem 0.4rem;
         border-radius: 3px;
     }
@@ -454,18 +449,28 @@ footer a:hover { text-decoration: underline; }
         color: var(--palette-white) !important; /* White text on accent for light mode today */
     }
 
+    .day-games-list {
+        /* flex-grow: 1; */ /* REMOVED - Allow natural height based on content */
+        /* min-height: 0; */ /* REMOVED */
+        overflow-y: auto;   /* Scroll if content exceeds max-height */
+        overflow-x: hidden;
+        max-height: 400px;  /* Optional: Limit height of a single day's game list */
+                            /* Remove if you want the list to grow indefinitely */
+        width: 100%;        /* Ensure it takes full width of its container */
+    }
 
-    /* --- REVISED STYLES FOR GAME ITEMS IN LIST VIEW --- */
+    /* --- STYLES FOR GAME ITEMS IN MOBILE LIST VIEW --- */
     .day-game-item {
-        display: flex; /* Ensure it's still a flex container */
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 8px; /* Add some internal padding to the item */
-        margin-bottom: 8px; /* Space between game items */
-        border-radius: 4px; /* Optional: round corners of the item */
-        background-color: rgba(0,0,0,0.03); /* Faint background to distinguish items */
-        /* text-shadow from general rule still applies */
-        font-size: inherit; /* Reset font-size from .day-game-item (0.65rem) at 768px breakpoint */
+        display: flex;
+        flex-direction: column; /* Stack image, name, metacritic vertically */
+        align-items: flex-start; /* Align items to the start of the cross-axis */
+        padding: 8px;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        background-color: rgba(0,0,0,0.03);
+        font-size: inherit; /* Reset from potentially smaller general .day-game-item font size */
+        text-decoration: none; /* Remove underline from <a> tag */
+        color: var(--day-game-item-text); /* Ensure text color is inherited correctly */
     }
     body.dark-mode .day-game-item {
         background-color: rgba(255,255,255,0.03);
@@ -475,41 +480,39 @@ footer a:hover { text-decoration: underline; }
     }
 
     .day-game-item img {
-        width: 100%;         /* Image takes full width of the .day-game-item */
-        max-height: 100px;   /* Limit the image's maximum height. Adjust 100px as needed. */
-        object-fit: cover;   /* Ensures image covers the 100px height, cropping if necessary, maintaining aspect ratio. */
-        border-radius: 3px;  /* Rounded corners for the image */
-        margin-bottom: 8px;  /* Increased space between image and game name */
-        margin-right: 0;     /* Reset from general styles */
-        background-color: var(--palette-medium-dark); /* Fallback bg for image loading */
-        flex-shrink: 0;      /* Already there, but good to confirm */
+        width: 100%;
+        max-height: 120px;  /* Adjusted max-height for better proportion, tweak as needed */
+        object-fit: cover;
+        border-radius: 3px;
+        margin-bottom: 8px;
+        margin-right: 0; /* Reset from general styles */
+        background-color: var(--palette-medium-dark); /* Fallback bg */
+        flex-shrink: 0;
     }
     body:not(.dark-mode) .day-game-item img {
         background-color: #e0e0e0;
     }
 
-
     .day-game-item .game-name {
-        white-space: normal;   /* Allow text to wrap */
-        overflow: visible;     /* Ensure text isn't cut off if it wraps */
-        text-overflow: clip;   /* Standard for wrapped text */
-        font-size: 0.85rem;    /* Slightly larger for better readability */
-        font-weight: 500;      /* Make it a bit bolder */
-        line-height: 1.3;
-        color: var(--day-game-item-text); /* Ensure text color is applied */
-        margin-bottom: 4px;    /* Space between name and metacritic */
-        display: block;        /* Ensure it takes up block space for proper layout */
-        width: 100%;           /* Allow it to use full width for wrapping if needed */
-        flex-grow: 0;          /* Reset from general styles if it was causing issues */
+        white-space: normal; /* Allow text to wrap */
+        overflow: visible;   /* Allow text to be fully visible */
+        text-overflow: clip;
+        font-size: 0.9rem;  /* Slightly larger for game name */
+        font-weight: 500;
+        line-height: 1.4;   /* Increased for readability */
+        color: var(--day-game-item-text); /* Explicitly set text color */
+        margin-bottom: 6px; /* Space below name */
+        display: block;      /* Ensure it behaves as a block for width and margin */
+        width: 100%;         /* Take full width within the item */
     }
 
     .day-game-item .game-metacritic {
-        margin-left: 0;      /* Reset margin from desktop styles */
-        margin-top: 0;       /* Adjust based on game-name's margin-bottom */
-        font-size: 0.7rem;   /* Ensure it's not too large */
-        align-self: flex-start; /* Ensure it aligns to the start below the name */
-        /* padding, border-radius, color, text-shadow inherited */
-        flex-shrink: 0; /* Already there */
+        margin-left: 0;
+        margin-top: 0; /* Will naturally follow game-name due to column layout */
+        font-size: 0.75rem; /* Slightly larger metacritic */
+        align-self: flex-start; /* Align to the start */
+        /* padding, border-radius, color, text-shadow are inherited from general rules */
+        /* text-shadow: none; is inherited from general rule */
     }
-    /* --- END OF REVISED MOBILE GAME ITEM STYLES --- */
+    /* --- END OF MOBILE GAME ITEM STYLES --- */
 }
