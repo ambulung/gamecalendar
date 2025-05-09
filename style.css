@@ -72,7 +72,7 @@ body.dark-mode {
 html, body {
     margin: 0;
     padding: 0;
-    height: 100%; /* Ensure body can be a reference for full height if needed */
+    height: 100%;
 }
 
 body {
@@ -160,7 +160,7 @@ body {
 .header-nav-item.form-check:hover #darkModeIconContainer i {
     color: var(--palette-accent);
 }
-.form-check-input { /* For main header toggle */
+.form-check-input {
     background-color: var(--palette-medium-dark);
     border-color: var(--palette-medium-dark);
     cursor: pointer;
@@ -173,7 +173,7 @@ body {
     box-shadow: 0 0 0 0.25rem rgba(var(--palette-accent-rgb), 0.25);
 }
 
-/* Month Navigation Sub-Header (Full Width) */
+/* Month Navigation Sub-Header */
 .month-navigation-header {
     background-color: var(--sub-header-bg);
     color: var(--sub-header-text);
@@ -183,17 +183,16 @@ body {
 }
 .sticky-top-subheader {
     position: sticky;
-    top: 60px; /* Height of the .site-header */
+    top: 60px;
     z-index: 1020;
 }
 .site-header.sticky-top {
-    z-index: 1021; /* Ensure main header is on top of sub-header if both are sticky */
+    z-index: 1021;
 }
 .month-nav-content-container {
     max-width: 1600px;
     margin: 0 auto;
 }
-/* Controls within month-navigation-header */
 .month-navigation-header .form-control,
 .month-navigation-header .form-select {
     background-color: var(--form-control-bg);
@@ -237,7 +236,6 @@ body.dark-mode .month-navigation-header .btn-outline-secondary:hover {
     color: var(--sub-header-text);
 }
 
-
 /* Main Calendar Container */
 .calendar-container {
     max-width: 1400px;
@@ -259,11 +257,11 @@ body.dark-mode .month-navigation-header .btn-outline-secondary:hover {
     color: var(--calendar-text);
 }
 .calendar-day {
-    position: relative; width: 100%; height: 0; padding-bottom: 100%;
+    position: relative; width: 100%; height: 0; padding-bottom: 100%; /* Aspect ratio for grid */
     border: 1px solid var(--calendar-border);
     border-radius: 0.25rem;
     background-color: var(--calendar-bg);
-    overflow: hidden;
+    overflow: hidden; /* Important for grid view, might affect list if not careful */
 }
 .day-background-slideshow {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
@@ -274,9 +272,10 @@ body.dark-mode .month-navigation-header .btn-outline-secondary:hover {
     transition: opacity 1s ease-in-out;
 }
 .day-background-slideshow img.active-slide { opacity: 1; z-index: 1; }
+
 .day-content-wrapper {
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    padding: 5px; display: flex; flex-direction: column; overflow: hidden;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; /* Fill .calendar-day */
+    padding: 5px; display: flex; flex-direction: column; overflow: hidden; /* Important for grid scroll */
     z-index: 2;
     background-color: var(--content-wrapper-overlay-light);
     transition: background-color 0.3s;
@@ -288,6 +287,7 @@ body.dark-mode .day-content-wrapper {
 body.dark-mode .calendar-day.empty-day {
     background-color: color-mix(in srgb, var(--palette-darkest) 90%, black);
 }
+
 .day-number {
     align-self: flex-end; font-size: 0.8rem; font-weight: bold;
     color: var(--day-number-text-light);
@@ -309,13 +309,15 @@ body.dark-mode .day-number {
 body:not(.dark-mode) .calendar-day.today .day-number {
     color: var(--palette-white);
 }
+
 .day-games-list {
-    flex-grow: 1; overflow-y: auto; overflow-x: hidden; min-height: 0;
+    flex-grow: 1; overflow-y: auto; overflow-x: hidden; min-height: 0; /* For grid view */
 }
 .day-games-list::-webkit-scrollbar { width: 5px; }
 .day-games-list::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 .day-games-list::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb); border-radius: 10px; }
 .day-games-list { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
+
 .day-game-item {
     display: flex; align-items: center; padding: 3px; margin-bottom: 3px;
     border-radius: 3px;
@@ -332,14 +334,16 @@ body:not(.dark-mode) .day-game-item {
 .day-game-item:last-child { margin-bottom: 1px; }
 .day-game-item:hover { background-color: rgba(0,0,0,0.08); }
 body.dark-mode .day-game-item:hover { background-color: rgba(255,255,255,0.05); }
+
 .day-game-item img {
     width: 32px; height: 20px; object-fit: cover; margin-right: 5px;
     border-radius: 2px; flex-shrink: 0;
     background-color: var(--palette-medium-dark);
 }
 body:not(.dark-mode) .day-game-item img { background-color: #e0e0e0; }
+
 .day-game-item .game-name {
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* For grid view */
     flex-grow: 1; line-height: 1.3;
 }
 .day-game-item .game-metacritic {
@@ -358,7 +362,6 @@ footer { border-top: 1px solid var(--calendar-border); color: var(--calendar-tex
 footer a { color: var(--palette-accent); text-decoration: none; }
 footer a:hover { text-decoration: underline; }
 
-
 /* Responsive adjustments */
 @media (max-width: 992px) {
     .header-logo { font-size: 1.3rem; margin-right: 1rem; }
@@ -366,7 +369,7 @@ footer a:hover { text-decoration: underline; }
 }
 @media (max-width: 768px) {
     .site-header { height: 56px; }
-    .sticky-top-subheader { top: 56px; } /* Match new main header height */
+    .sticky-top-subheader { top: 56px; }
 
     .header-logo { display: none; }
     .header-search-container { margin-left: 0.5rem; margin-right: 0.5rem; max-width: none; }
@@ -381,48 +384,47 @@ footer a:hover { text-decoration: underline; }
     .month-nav-content-container .d-flex.justify-content-md-end { justify-content: center !important; }
 
     .day-name { font-size: 0.75rem; padding: 0.3rem 0.1rem; }
-    .day-game-item { font-size: 0.65rem; } /* Will be overridden by more specific rules if screen is also < 576px */
-    .day-game-item img { width: 28px; height: 18px; } /* Will be overridden by more specific rules if screen is also < 576px */
-    .day-number { font-size: 0.7rem; } /* Will be overridden by more specific rules if screen is also < 576px */
+    .day-game-item { font-size: 0.65rem; }
+    .day-game-item img { width: 28px; height: 18px; }
+    .day-number { font-size: 0.7rem; }
 }
 
 @media (max-width: 576px) {
     #currentMonthYear { font-size: 1.5rem; }
     .month-nav-content-container .btn, .month-nav-content-container .form-select { font-size: 0.8rem; }
 
-    /* ===== MOBILE LIST VIEW FOR CALENDAR (Transformation & Fixes) ===== */
+    /* ===== MOBILE LIST VIEW FOR CALENDAR ===== */
     .calendar-grid {
         display: block;
         border: none;
         padding: 0;
     }
-
     .day-name {
         display: none;
     }
 
     .calendar-day {
         width: 100%;
-        height: auto;
-        padding-bottom: 0;
+        height: auto; /* Let content determine height */
+        padding-bottom: 0; /* Remove aspect ratio for list */
         margin-bottom: 1rem;
-        /* border, border-radius, overflow, position:relative are inherited */
-        /* background-color is inherited from general .calendar-day rule */
+        overflow: visible; /* Allow content to be visible if it naturally overflows a bit */
+        min-height: 50px; /* Ensure even empty day cards have some height */
     }
     .calendar-day:last-child {
         margin-bottom: 0;
     }
     .calendar-day.empty-day {
-        display: none;
+        display: none; /* Hide empty days in list view for cleaner look */
     }
 
     .day-content-wrapper {
-        position: static; /* Ensures it contributes to parent's auto height */
-        display: flex; /* Keep as flex for internal alignment */
-        flex-direction: column; /* Stack day-number and day-games-list vertically */
+        position: static; /* Normal flow */
+        display: flex;
+        flex-direction: column;
         padding: 0.75rem;
-        /* background-color var(--content-wrapper-overlay-...) is inherited */
-        /* z-index is not needed as it's static */
+        overflow: visible; /* Allow its content (game list) to determine height */
+        min-height: 40px; /* Ensure wrapper itself has some min height */
     }
 
     .day-number {
@@ -431,49 +433,46 @@ footer a:hover { text-decoration: underline; }
         font-size: 1.1rem;
         font-weight: bold;
         padding: 0.1rem 0;
-        margin-bottom: 0.5rem;
-        background-color: transparent;
+        margin-bottom: 0.75rem; /* More space before game list */
         color: var(--calendar-text);
         text-shadow: none;
-        border-radius: 0;
-        line-height: 1.3;
-        flex-shrink: 0; /* Ensure it doesn't shrink if day-games-list tries to grow excessively */
+        flex-shrink: 0;
     }
     .calendar-day.today .day-number {
         background-color: var(--calendar-today-border);
-        color: var(--palette-darkest) !important; /* Dark text on accent for today */
+        color: var(--palette-darkest) !important;
         padding: 0.2rem 0.4rem;
         border-radius: 3px;
     }
     body:not(.dark-mode) .calendar-day.today .day-number {
-        color: var(--palette-white) !important; /* White text on accent for light mode today */
+        color: var(--palette-white) !important;
     }
 
     .day-games-list {
-        /* flex-grow: 1; */ /* REMOVED - Allow natural height based on content */
-        /* min-height: 0; */ /* REMOVED */
-        overflow-y: auto;   /* Scroll if content exceeds max-height */
+        flex-grow: 0; /* Don't grow, take natural height */
+        flex-shrink: 1; /* Allow shrinking if needed, but should be based on content */
+        overflow-y: visible; /* Let content flow, no internal scroll for the list itself */
         overflow-x: hidden;
-        max-height: 400px;  /* Optional: Limit height of a single day's game list */
-                            /* Remove if you want the list to grow indefinitely */
-        width: 100%;        /* Ensure it takes full width of its container */
+        width: 100%;
+        min-height: 10px; /* Small min-height just to ensure it occupies some space if JS adds it */
     }
 
     /* --- STYLES FOR GAME ITEMS IN MOBILE LIST VIEW --- */
     .day-game-item {
         display: flex;
-        flex-direction: column; /* Stack image, name, metacritic vertically */
-        align-items: flex-start; /* Align items to the start of the cross-axis */
-        padding: 8px;
-        margin-bottom: 8px;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px; /* Increased padding */
+        margin-bottom: 10px; /* Increased margin */
         border-radius: 4px;
         background-color: rgba(0,0,0,0.03);
-        font-size: inherit; /* Reset from potentially smaller general .day-game-item font size */
-        text-decoration: none; /* Remove underline from <a> tag */
-        color: var(--day-game-item-text); /* Ensure text color is inherited correctly */
+        font-size: inherit;
+        text-decoration: none;
+        color: var(--day-game-item-text);
+        min-height: 50px; /* Ensure game item itself has some height for text */
     }
     body.dark-mode .day-game-item {
-        background-color: rgba(255,255,255,0.03);
+        background-color: rgba(255,255,255,0.05); /* Slightly more contrast for dark mode items */
     }
     .day-game-item:last-child {
         margin-bottom: 0;
@@ -481,12 +480,12 @@ footer a:hover { text-decoration: underline; }
 
     .day-game-item img {
         width: 100%;
-        max-height: 120px;  /* Adjusted max-height for better proportion, tweak as needed */
+        max-height: 120px;
         object-fit: cover;
         border-radius: 3px;
-        margin-bottom: 8px;
-        margin-right: 0; /* Reset from general styles */
-        background-color: var(--palette-medium-dark); /* Fallback bg */
+        margin-bottom: 10px; /* More space below image */
+        margin-right: 0;
+        background-color: var(--palette-medium-dark);
         flex-shrink: 0;
     }
     body:not(.dark-mode) .day-game-item img {
@@ -494,25 +493,37 @@ footer a:hover { text-decoration: underline; }
     }
 
     .day-game-item .game-name {
-        white-space: normal; /* Allow text to wrap */
-        overflow: visible;   /* Allow text to be fully visible */
+        display: block; /* Crucial for width and taking space */
+        width: 100%;    /* Take full width */
+        white-space: normal;
+        overflow: visible;
         text-overflow: clip;
-        font-size: 0.9rem;  /* Slightly larger for game name */
-        font-weight: 500;
-        line-height: 1.4;   /* Increased for readability */
-        color: var(--day-game-item-text); /* Explicitly set text color */
-        margin-bottom: 6px; /* Space below name */
-        display: block;      /* Ensure it behaves as a block for width and margin */
-        width: 100%;         /* Take full width within the item */
+        font-size: 0.95rem; /* Slightly larger */
+        font-weight: 600;   /* Bolder */
+        line-height: 1.4;
+        color: var(--day-game-item-text); /* Ensure color is set */
+        margin-bottom: 8px;
+        min-height: 1.4em; /* Ensure at least one line of text height */
+        /* For debugging text visibility: */
+        /* background-color: red; */ /* Uncomment to see the box */
+        /* border: 1px solid yellow; */ /* Uncomment to see the box */
+        flex-grow: 0; /* Do not grow or shrink in flex context of parent */
+        flex-shrink: 0;
+        flex-basis: auto;
     }
 
     .day-game-item .game-metacritic {
-        margin-left: 0;
-        margin-top: 0; /* Will naturally follow game-name due to column layout */
-        font-size: 0.75rem; /* Slightly larger metacritic */
-        align-self: flex-start; /* Align to the start */
-        /* padding, border-radius, color, text-shadow are inherited from general rules */
-        /* text-shadow: none; is inherited from general rule */
+        display: block; /* Ensure it takes space */
+        font-size: 0.8rem;
+        align-self: flex-start;
+        min-height: 1.2em; /* Ensure at least one line of text height */
+        /* For debugging text visibility: */
+        /* background-color: blue; */ /* Uncomment to see the box */
+        /* color: white !important; */ /* Uncomment to force color */
+        flex-grow: 0;
+        flex-shrink: 0;
+        flex-basis: auto;
+        /* General styles for padding, color, etc. should apply */
     }
     /* --- END OF MOBILE GAME ITEM STYLES --- */
 }
