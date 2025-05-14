@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // API Key is handled by Netlify Functions, no client-side key needed.
 
-    const calendarGrid = document.querySelector('.calendar-grid');
+    const calendarGridView = document.getElementById('calendarGridView'); // Grid container
+    const calendarListView = document.getElementById('calendarListView'); // List container
     const currentMonthYearDisplay = document.getElementById('currentMonthYear');
     const prevMonthBtn = document.getElementById('prevMonthBtn');
     const nextMonthBtn = document.getElementById('nextMonthBtn');
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const goToDateBtn = document.getElementById('goToDateBtn');
     const darkModeToggle = document.getElementById('darkModeToggle');
     const darkModeIconContainer = document.getElementById('darkModeIconContainer');
+    const toggleContainer = document.getElementById('darkModeToggleContainer'); // Wrapper div
     const loadingIndicator = document.getElementById('loadingIndicator');
     const errorMessagesDiv = document.getElementById('errorMessages');
     const gameSearchInput = document.getElementById('gameSearchInput');
@@ -18,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchTimeout;
 
     let currentDate = new Date();
-    let gamesCache = {};
+    let gamesCache = {}; // Client-side caching
     let gamesByDay = {};
     let activeSlideshowIntervals = [];
 
@@ -69,15 +71,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+     // --- Helper Function to Create Game Item Element ---
+    // Moved this logic into a reusable function for both grid and list views
+    function createGameItemElement(game) {
+        const gameItem = document.createElement('a');
+        gameItem.className = 'day-game-item'; // Use the shared base class
+        gameItem.href = `https://rawg.io/games/${game.slug || game.name.toLowerCase().replace(/\s+/g, '-')}`;
+        gameItem.target = '_blank';
+        gameItem.title = `${game.name} - Rating: ${game.rating || 'N/A'}, Metacritic: ${game.metacritic || 'N/A'}`;
+
+        const imgEl = document.createElement('img');
+        imgEl.src = game.background_image || 'https://via.placeholder.com/32x20?text=G'; // Default size, CSS overrides for list
+        imgEl.alt = game.name.substring(0,3);
+        imgEl.loading = 'lazy'; // Add lazy loading for game images
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'game-name';
+        nameSpan.textContent = game.name;
+        
+        gameItem.appendChild(imgEl);
+        gameItem.appendChild(nameSpan);
+
+        if (game.metacritic) {
+            const metacriticSpan = document.createElement('span');
+            metacriticSpan.className = 'game-metacritic';
+            metacriticSpan.textContent = game.metacritic;
+            // Add metacritic color styling
+            if (game.metacritic >= 75) metacriticSpan.style.backgroundColor = '#6c3';
+            else if (game.metacritic >= 50) metacriticSpan.style.backgroundColor = '#fc3';
+            else if (game.metacritic > 0) metacriticSpan.style.backgroundColor = '#f00';
+            else metacriticSpan.style.backgroundColor = '#888';
+            gameItem.appendChild(metacriticSpan);
+        }
+        return gameItem;
+    }
+
 
     // --- SETUP AND INITIALIZATION ---
     async function init() {
         console.log("Client: init() called");
-        setupEventListeners(); // Now handleSearchInput and handleSearchKeyDown are defined
+        setupEventListeners();
         populateMonthYearSelectors();
         loadDarkModePreference();
         try {
             console.log("Client: Calling initial renderCalendar...");
+            // Use await here to ensure the first render completes before other things might try to access elements
             await renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
             console.log("Client: Initial renderCalendar finished.");
         } catch (error) {
@@ -102,23 +140,36 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCalendar(year, month);
         });
         
-        const toggleContainer = document.getElementById('darkModeToggleContainer');
-        if(toggleContainer && darkModeToggle) { // Ensure both exist
-            darkModeToggle.addEventListener('change', toggleDarkMode);
+        if (darkModeToggle && toggleContainer) {
+            // Listen for changes on the actual checkbox (e.g., keyboard interaction)
+            darkModeToggle.addEventListener('change', () => {
+                // The 'checked' state is already updated by the browser
+                toggleDarkModeLogic(darkModeToggle.checked);
+            });
+
+            // Make the entire container clickable (covers the icon area)
             toggleContainer.addEventListener('click', (event) => {
-                if (event.target !== darkModeToggle && event.target.parentNode !== darkModeToggle) {
+                // Only manually toggle if the click was NOT on the input itself or its direct label
+                // The label click should handle it normally via browser behavior, but this adds robustness
+                 if (event.target !== darkModeToggle && event.target !== darkModeIconContainer && !darkModeIconContainer.contains(event.target) && event.target.tagName !== 'I') {
                     darkModeToggle.checked = !darkModeToggle.checked;
-                    toggleDarkMode(); 
+                    toggleDarkModeLogic(darkModeToggle.checked); 
                 }
             });
         }
 
-        if(gameSearchInput) gameSearchInput.addEventListener('input', handleSearchInput); // Now defined
-        if(gameSearchInput) gameSearchInput.addEventListener('keydown', handleSearchKeyDown); // Now defined
+        if(gameSearchInput) gameSearchInput.addEventListener('input', handleSearchInput);
+        if(gameSearchInput) gameSearchInput.addEventListener('keydown', handleSearchKeyDown);
         
         document.addEventListener('click', (event) => {
-            if (searchSuggestionsDiv && !searchSuggestionsDiv.contains(event.target) && event.target !== gameSearchInput) {
-                searchSuggestionsDiv.style.display = 'none';
+            // Hide suggestions if clicking outside the search input and suggestions area
+            if (searchSuggestionsDiv && gameSearchInput) { // Check if elements exist
+                 const isClickInsideSearchArea = gameSearchInput.contains(event.target) || searchSuggestionsDiv.contains(event.target);
+                 if (!isClickInsideSearchArea) {
+                     searchSuggestionsDiv.style.display = 'none';
+                 }
+            } else if (searchSuggestionsDiv && !searchSuggestionsDiv.contains(event.target)) { // Fallback if searchInput not found
+                 searchSuggestionsDiv.style.display = 'none';
             }
         });
     }
@@ -128,25 +179,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const isDarkMode = localStorage.getItem('darkMode') === 'true';
         if (darkModeToggle) darkModeToggle.checked = isDarkMode;
         
-        document.body.classList.toggle('dark-mode', isDarkMode);
-        document.body.classList.toggle('light-mode', !isDarkMode);
-
-        updateDarkModeIcon(isDarkMode);
+        applyTheme(isDarkMode);
     }
 
-    function toggleDarkMode() {
-        const isDarkMode = darkModeToggle.checked;
-        
+    function toggleDarkModeLogic(isDarkMode) { 
+        localStorage.setItem('darkMode', isDarkMode);
+        applyTheme(isDarkMode);
+    }
+
+    function applyTheme(isDarkMode) {
         document.body.classList.toggle('dark-mode', isDarkMode);
         document.body.classList.toggle('light-mode', !isDarkMode);
-        
-        localStorage.setItem('darkMode', isDarkMode);
         updateDarkModeIcon(isDarkMode);
     }
 
     function updateDarkModeIcon(isDarkMode) {
         if (darkModeIconContainer) {
-            darkModeIconContainer.innerHTML = isDarkMode ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-stars-fill"></i>';
+            const iconElement = darkModeIconContainer.querySelector('i');
+            if (iconElement) {
+                iconElement.className = isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+            } else {
+                 darkModeIconContainer.innerHTML = isDarkMode ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-stars-fill"></i>';
+            }
         }
     }
 
@@ -162,9 +216,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function populateMonthYearSelectors() {
-        monthNames.forEach((name, index) => monthSelect.add(new Option(name, index)));
-        const currentYr = new Date().getFullYear();
-        for (let i = currentYr - 10; i <= currentYr + 10; i++) yearSelect.add(new Option(i, i));
+        if(monthSelect && yearSelect) { // Check if elements exist
+            monthNames.forEach((name, index) => monthSelect.add(new Option(name, index)));
+            const currentYr = new Date().getFullYear();
+            for (let i = currentYr - 10; i <= currentYr + 10; i++) yearSelect.add(new Option(i, i));
+        }
     }
 
     function clearAllSlideshows() {
@@ -181,15 +237,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if(yearSelect) yearSelect.value = year;
 
         clearAllSlideshows();
-        if(calendarGrid) calendarGrid.querySelectorAll('.calendar-day, .empty-day').forEach(cell => cell.remove());
+        
+        // Clear Grid View
+        if(calendarGridView) calendarGridView.querySelectorAll('.calendar-day, .empty-day, .day-name:not(:first-child):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)):not(:nth-child(5)):not(:nth-child(6)):not(:nth-child(7))').forEach(el => el.remove());
+        // Clear List View
+        if(calendarListView) calendarListView.innerHTML = '';
 
         const firstDayOfMonth = new Date(year, month, 1).getDay();
         const daysInCurrentMonth = getDaysInMonth(year, month);
         const todayObj = new Date();
-
-        for (let i = 0; i < firstDayOfMonth; i++) {
-            if(calendarGrid) calendarGrid.appendChild(Object.assign(document.createElement('div'), { className: 'empty-day calendar-day' }));
-        }
 
         console.log(`Client: Attempting to fetch games for ${year}-${month + 1}`);
         const gamesForMonth = await fetchGamesForMonth(year, month);
@@ -209,87 +265,96 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn("Client: gamesForMonth is not an array:", gamesForMonth);
         }
 
-        for (let day = 1; day <= daysInCurrentMonth; day++) {
-            const dayCell = document.createElement('div');
-            dayCell.classList.add('calendar-day');
+        // --- Populate Grid View (for medium screens and up) ---
+        if (calendarGridView) {
+             // Add empty cells for padding before the first day
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                calendarGridView.appendChild(Object.assign(document.createElement('div'), { className: 'empty-day calendar-day' }));
+            }
 
-            const gamesOnThisDay = gamesByDay[day];
-            const imagesForSlideshow = [];
-            if (gamesOnThisDay && gamesOnThisDay.length > 0) {
-                gamesOnThisDay.forEach(game => {
-                    if (game.background_image) imagesForSlideshow.push(game.background_image);
-                });
+            // Loop through days to populate grid cells
+            for (let day = 1; day <= daysInCurrentMonth; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('calendar-day');
 
-                if (imagesForSlideshow.length > 0) {
-                    const slideshowDiv = document.createElement('div');
-                    slideshowDiv.className = 'day-background-slideshow';
-                    imagesForSlideshow.forEach((imgSrc, index) => {
-                        const img = document.createElement('img');
-                        img.src = imgSrc;
-                        img.alt = `Game background ${index + 1}`;
-                        slideshowDiv.appendChild(img);
+                const gamesOnThisDay = gamesByDay[day];
+                const imagesForSlideshow = [];
+                if (gamesOnThisDay && gamesOnThisDay.length > 0) {
+                    gamesOnThisDay.forEach(game => { if (game.background_image) imagesForSlideshow.push(game.background_image); });
+                    if (imagesForSlideshow.length > 0) { /* ... slideshow div creation ... */
+                        const slideshowDiv = document.createElement('div');
+                        slideshowDiv.className = 'day-background-slideshow';
+                        imagesForSlideshow.forEach((imgSrc, index) => { /* ... img creation ... */ 
+                            const img = document.createElement('img'); img.src = imgSrc; img.alt = `Game background ${index + 1}`; slideshowDiv.appendChild(img); });
+                        dayCell.appendChild(slideshowDiv);
+                        startSlideshowForCell(slideshowDiv, imagesForSlideshow.length > 1 ? 4000 : 0);
+                    }
+                }
+
+                const contentWrapper = document.createElement('div');
+                contentWrapper.className = 'day-content-wrapper';
+                const dayNumberSpan = Object.assign(document.createElement('span'), { className: 'day-number', textContent: day });
+                contentWrapper.appendChild(dayNumberSpan);
+
+                if (year === todayObj.getFullYear() && month === todayObj.getMonth() && day === todayObj.getDate()) {
+                    dayCell.classList.add('today');
+                }
+
+                if (gamesOnThisDay && gamesOnThisDay.length > 0) {
+                    const dayGamesListDiv = document.createElement('div');
+                    dayGamesListDiv.className = 'day-games-list'; // For internal scroll
+                    gamesOnThisDay.forEach(game => {
+                        dayGamesListDiv.appendChild(createGameItemElement(game)); // Use helper function
                     });
-                    dayCell.appendChild(slideshowDiv);
-                    startSlideshowForCell(slideshowDiv, imagesForSlideshow.length > 1 ? 4000 : 0);
+                    contentWrapper.appendChild(dayGamesListDiv);
+                }
+                dayCell.appendChild(contentWrapper);
+                calendarGridView.appendChild(dayCell);
+            }
+
+            // Add empty cells at the end
+             const totalGridCells = firstDayOfMonth + daysInCurrentMonth;
+             const remainingGridCells = (7 - (totalGridCells % 7)) % 7;
+             for (let i = 0; i < remainingGridCells; i++) {
+                 calendarGridView.appendChild(Object.assign(document.createElement('div'), { className: 'empty-day calendar-day' }));
+             }
+        }
+
+
+        // --- Populate List View (for small screens) ---
+        if (calendarListView) {
+            let hasGamesInList = false;
+            for (let day = 1; day <= daysInCurrentMonth; day++) {
+                const gamesOnThisDay = gamesByDay[day];
+
+                if (gamesOnThisDay && gamesOnThisDay.length > 0) {
+                    hasGamesInList = true;
+                    const listDayItem = document.createElement('div');
+                    listDayItem.className = 'list-day-item';
+
+                    // Add Date Header
+                    const listDayHeader = document.createElement('h5'); // Or h6, div etc.
+                    listDayHeader.className = 'list-day-header';
+                    const dateForHeader = new Date(year, month, day);
+                    listDayHeader.textContent = dateForHeader.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); // Format: e.g., Monday, May 15, 2025
+                    listDayItem.appendChild(listDayHeader);
+
+                    // Add Games List for this day
+                    const gamesContainer = document.createElement('div');
+                    gamesOnThisDay.forEach(game => {
+                        gamesContainer.appendChild(createGameItemElement(game)); // Use helper function
+                    });
+                    listDayItem.appendChild(gamesContainer);
+
+                    calendarListView.appendChild(listDayItem);
                 }
             }
-
-            const contentWrapper = document.createElement('div');
-            contentWrapper.className = 'day-content-wrapper';
-
-            const dayNumberSpan = Object.assign(document.createElement('span'), {
-                className: 'day-number', textContent: day
-            });
-            contentWrapper.appendChild(dayNumberSpan);
-
-            if (year === todayObj.getFullYear() && month === todayObj.getMonth() && day === todayObj.getDate()) {
-                dayCell.classList.add('today');
-            }
-
-            if (gamesOnThisDay && gamesOnThisDay.length > 0) {
-                const dayGamesListDiv = document.createElement('div');
-                dayGamesListDiv.className = 'day-games-list';
-                gamesOnThisDay.forEach(game => {
-                    const gameItem = document.createElement('a');
-                    gameItem.className = 'day-game-item';
-                    gameItem.href = `https://rawg.io/games/${game.slug || game.name.toLowerCase().replace(/\s+/g, '-')}`;
-                    gameItem.target = '_blank';
-                    gameItem.title = `${game.name} - Rating: ${game.rating || 'N/A'}, Metacritic: ${game.metacritic || 'N/A'}`;
-
-                    const imgEl = document.createElement('img');
-                    imgEl.src = game.background_image || 'https://via.placeholder.com/32x20?text=G';
-                    imgEl.alt = game.name.substring(0,3);
-
-                    const nameSpan = document.createElement('span');
-                    nameSpan.className = 'game-name';
-                    nameSpan.textContent = game.name;
-                    
-                    gameItem.appendChild(imgEl);
-                    gameItem.appendChild(nameSpan);
-
-                    if (game.metacritic) {
-                        const metacriticSpan = document.createElement('span');
-                        metacriticSpan.className = 'game-metacritic';
-                        metacriticSpan.textContent = game.metacritic;
-                        if (game.metacritic >= 75) metacriticSpan.style.backgroundColor = '#6c3';
-                        else if (game.metacritic >= 50) metacriticSpan.style.backgroundColor = '#fc3';
-                        else if (game.metacritic > 0) metacriticSpan.style.backgroundColor = '#f00';
-                        else metacriticSpan.style.backgroundColor = '#888';
-                        gameItem.appendChild(metacriticSpan);
-                    }
-                    dayGamesListDiv.appendChild(gameItem);
-                });
-                contentWrapper.appendChild(dayGamesListDiv);
-            }
-            dayCell.appendChild(contentWrapper);
-            if(calendarGrid) calendarGrid.appendChild(dayCell);
+             // Optional: Show a message if no games found for the entire month in list view
+             if (!hasGamesInList) {
+                 calendarListView.innerHTML = '<p class="text-center text-muted p-3">No game releases found for this month.</p>';
+             }
         }
 
-        const totalCells = firstDayOfMonth + daysInCurrentMonth;
-        const remainingCells = (7 - (totalCells % 7)) % 7;
-        for (let i = 0; i < remainingCells; i++) {
-            if(calendarGrid) calendarGrid.appendChild(Object.assign(document.createElement('div'), { className: 'empty-day calendar-day' }));
-        }
         console.log(`Client: Finished processing day cells for ${year}-${month}`);
         showLoading(false);
     }
@@ -303,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (intervalTime === 0 || images.length <= 1) return;
         const intervalId = setInterval(() => {
-            if (!slideshowDiv.isConnected) { 
+            if (!slideshowDiv.isConnected) { // Stop interval if element is removed from DOM
                 clearInterval(intervalId);
                 return;
             }
@@ -374,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(functionUrl);
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: "Failed to parse error from function." }));
+                let errorData = await response.json().catch(() => ({ error: "Failed to parse error from function." }));
                 console.error("Client: Error from Netlify function (fetchSearchSuggestions):", response.status, errorData);
                 if(searchSuggestionsDiv) searchSuggestionsDiv.innerHTML = `<div class="list-group-item text-danger">Error: ${errorData.error || `Server error ${response.status}`}</div>`;
                 return;
@@ -389,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("Client: Network error calling Netlify function (fetchSearchSuggestions):", error);
-            if(searchSuggestionsDiv) searchSuggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Network error.</div>';
+            if(searchSuggestionsDiv) searchSuggestionsDiv.innerHTML = '<div class-list-group-item text-danger">Network error.</div>';
         }
     }
 
@@ -410,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(functionUrl);
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ error: "Failed to parse error from function." }));
+                    let errorData = await response.json().catch(() => ({ error: "Failed to parse error from function." }));
                     throw new Error(errorData.error || `Server error ${response.status}`);
                 }
                 const data = await response.json();
@@ -465,6 +530,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Call init at the end to start the application
     init();
 });
