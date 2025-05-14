@@ -16,7 +16,7 @@
     --site-header-search-icon: #777777;
     --site-header-search-shortcut-bg: #3a3a3a;
     --site-header-search-shortcut-text: #aaa;
-    --site-header-nav-item-hover-bg: #2a2a2a;
+    --site-header-nav-item-hover-bg: #2a2a2a; /* Hover for items like bell icon */
 
     /* Light Mode Theme */
     --calendar-bg: var(--palette-light);
@@ -26,7 +26,7 @@
     --sub-header-bg: var(--palette-white);
     --sub-header-text: var(--palette-darkest);
     --sub-header-border: #e0e0e0;
-    --day-game-item-text: var(--palette-darkest);
+    --day-game-item-text: var(--palette-darkest); /* Text color for game items */
     --scrollbar-thumb: #b0bec5;
     --scrollbar-track: transparent;
     --btn-primary-bg: var(--palette-accent);
@@ -40,7 +40,12 @@
     --day-number-text-light: var(--palette-darkest);
     --day-number-text-shadow-light: none;
     --day-game-item-text-shadow-light: none;
-    --dark-mode-icon-color: var(--palette-medium-dark); /* Icon color in light mode */
+
+    /* Toggle specific colors */
+    --toggle-track-dark: var(--palette-medium-dark); /* Track color when toggle is OFF (Dark mode) */
+    --toggle-track-light: var(--palette-accent); /* Track color when toggle is ON (Light mode) */
+    --toggle-knob-color: var(--palette-white);
+    --toggle-label-color: var(--site-header-text); /* Label color in header */
 }
 
 body.dark-mode {
@@ -66,7 +71,12 @@ body.dark-mode {
     --day-number-text-dark: var(--palette-light);
     --day-number-text-shadow-dark: none;
     --day-game-item-text-shadow-dark: none;
-    --dark-mode-icon-color: var(--palette-accent); /* Icon color in dark mode */
+
+    /* Toggle specific colors */
+    --toggle-track-dark: var(--palette-medium-dark);
+    --toggle-track-light: var(--palette-accent);
+    --toggle-knob-color: var(--palette-white);
+    --toggle-label-color: var(--site-header-text); /* Label color in header */
 }
 
 html, body {
@@ -136,52 +146,95 @@ body {
 #searchSuggestions .list-group-item:hover { background-color: var(--site-header-nav-item-hover-bg); }
 #searchSuggestions .list-group-item img { border-radius: 3px; }
 .header-nav { display: flex; align-items: center; }
-.header-nav-item {
+.header-nav-item { /* General style for items like bell icon */
     color: var(--site-header-text); font-size: 1.2rem;
     padding: 0.5rem 0.6rem; border-radius: 50%;
     text-decoration: none; display: flex; align-items: center;
     transition: background-color 0.2s, color 0.2s;
 }
-.header-nav-item:not(.dark-mode-toggle-wrapper):hover {
-    background-color: var(--site-header-nav-item-hover-bg);
-    color: var(--palette-accent);
+.header-nav-item:hover {
+     background-color: var(--site-header-nav-item-hover-bg);
+     color: var(--palette-accent);
 }
 
-/* Cleaner Dark Mode Toggle */
-.dark-mode-toggle-wrapper {
-    padding: 0;
-    cursor: pointer;
+/* --- Dark Mode Toggle Styles --- */
+.dark-mode-toggle-wrapper { /* Container holding labels and switch */
     display: flex;
     align-items: center;
-    justify-content: center;
-    border-radius: 50px;
-    width: auto;
-    min-width: 40px;
-    height: 30px;
-    position: relative;
-    margin-left: 0.5rem; margin-right: 0.5rem;
-}
-.dark-mode-toggle-wrapper:hover {
-    background-color: var(--site-header-nav-item-hover-bg);
+    color: var(--toggle-label-color);
+    font-size: 0.85rem;
+    margin-left: 1rem;
 }
 
-#darkModeIconContainer {
-    display: inline-flex;
+.dark-mode-label, .light-mode-label {
+    padding: 0 0.5rem;
+    white-space: nowrap;
+    user-select: none; /* Prevent text selection */
+}
+
+.dark-mode-label { text-align: right; }
+.light-mode-label { text-align: left; }
+
+
+/* Override Bootstrap form-switch */
+.form-check-switch { /* The div with Bootstrap's form-check form-switch classes */
+    padding-left: 0 !important;
+    margin: 0 0.2rem; /* Space between labels and switch */
+    display: flex;
     align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    transition: color 0.2s;
+    /* min-width needed if labels are hidden on small screens */
+    min-width: 40px; /* Should be equal to the input width */
+    height: 20px; /* Should be equal to the input height */
 }
-#darkModeIconContainer i {
-    font-size: 0.9rem;
-    color: var(--dark-mode-icon-color);
-    line-height: 1;
+
+.form-check-switch .form-check-input {
+    width: 40px;
+    height: 20px;
+    margin: 0 !important;
+    float: none !important;
+    background-image: none !important; /* Remove default gradient/icon */
+    background-color: var(--toggle-track-dark); /* Track color (Dark mode ON / Light mode OFF) */
+    border-color: transparent; /* No visible border */
+    border-radius: 50px; /* Pill shape */
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out; /* Added transform transition */
+    position: relative;
+    cursor: pointer;
+    /* These hide the default checkbox visuals */
+    /* If using .visually-hidden-focusable in HTML, these might be redundant */
+    /* appearance: none; */
+    /* -webkit-appearance: none; */
 }
-.dark-mode-toggle-wrapper:hover #darkModeIconContainer i {
-    color: var(--palette-accent);
+
+/* Style the knob (the circle part) using ::after */
+.form-check-switch .form-check-input::after {
+    content: "";
+    display: block;
+    width: 16px; /* Size of the knob */
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--toggle-knob-color); /* White knob color */
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    position: absolute;
+    top: 2px; /* Center vertically */
+    left: 2px; /* Initial position (left) */
 }
-/* The actual checkbox input is hidden by .visually-hidden-focusable from Bootstrap */
+
+/* Checked state (Light mode is ON / Dark mode OFF) */
+.form-check-switch .form-check-input:checked {
+    background-color: var(--toggle-track-light); /* Track color when checked */
+}
+
+/* Position the knob when checked */
+.form-check-switch .form-check-input:checked::after {
+    transform: translateX(20px); /* Move knob to the right */
+}
+
+/* Focus state */
+.form-check-switch .form-check-input:focus {
+    border-color: transparent;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(var(--palette-accent-rgb), 0.25);
+}
 
 
 /* Month Navigation Sub-Header (Full Width) */
@@ -192,13 +245,13 @@ body {
     transition: background-color 0.3s, color 0.3s, border-color 0.3s;
     padding: 0;
 }
-.sticky-top-subheader { /* Making the sub-header sticky below the main header */
+.sticky-top-subheader {
     position: sticky;
-    top: 60px; /* Height of the .site-header */
+    top: 60px;
     z-index: 1020;
 }
 .site-header.sticky-top {
-    z-index: 1021; /* Ensure main header is on top */
+    z-index: 1021;
 }
 .month-nav-content-container {
     max-width: 1600px;
@@ -332,7 +385,7 @@ body:not(.dark-mode) .calendar-day.today .day-number {
 
 /* Calendar List View Styles (Visible < md breakpoint) */
 .calendar-list {
-    /* No grid needed, items will stack vertically */
+    /* display: block; -- Applied via .d-md-none */
 }
 .list-day-item {
     background-color: var(--sub-header-bg);
@@ -378,7 +431,8 @@ body.dark-mode .list-day-header {
     cursor: pointer; text-decoration: none; transition: background-color 0.15s ease-in-out;
 }
 body:not(.dark-mode) .day-game-item { text-shadow: var(--day-game-item-text-shadow-light); }
-.day-game-item:last-child { /* Specificity might be needed if list override is stronger */
+.day-game-item:last-child {
+    /* Specificity might be needed if list override is stronger */
     /* margin-bottom: 1px; */
 }
 .day-game-item:hover { background-color: rgba(0,0,0,0.08); }
@@ -416,6 +470,7 @@ footer a:hover { text-decoration: underline; }
     .header-search-container { max-width: 500px; }
 }
 @media (max-width: 768px) { /* md breakpoint */
+     /* Header responsive adjustments */
     .site-header { height: 56px; }
     .sticky-top-subheader { top: 56px; }
 
@@ -425,6 +480,7 @@ footer a:hover { text-decoration: underline; }
     .search-shortcut { display: none; }
     .header-nav-item { font-size: 1.1rem; padding: 0.4rem 0.5rem;}
 
+    /* Calendar responsive adjustments */
     .month-nav-content-container .row > div {
         width: 100%; text-align: center; margin-bottom: 0.5rem;
     }
@@ -436,18 +492,15 @@ footer a:hover { text-decoration: underline; }
     .list-day-header { font-size: 1rem; }
     .list-day-item .day-game-item { font-size: 0.75rem; }
     .list-day-item .day-game-item img { width: 40px; height: 25px; }
+
+    /* Dark mode labels hidden on small screens */
+    .dark-mode-label, .light-mode-label { display: none !important; }
 }
 @media (max-width: 576px) { /* sm breakpoint */
     #currentMonthYear { font-size: 1.5rem; }
     .month-nav-content-container .btn, .month-nav-content-container .form-select { font-size: 0.8rem; }
-    /* Game item stacking in list view */
-    .list-day-item .day-game-item {
-        flex-direction: column; align-items: flex-start;
-    }
-    .list-day-item .day-game-item img {
-         margin-bottom: 4px; width: 100%; height: auto; aspect-ratio: 16/10;
-    }
-     .list-day-item .day-game-item .game-metacritic {
-        margin-left: 0; margin-top: 3px;
-    }
+    .list-day-item .day-game-item { flex-direction: column; align-items: flex-start; }
+    .list-day-item .day-game-item img { margin-bottom: 4px; width: 100%; height: auto; aspect-ratio: 16/10; }
+    .list-day-item .day-game-item .game-name { white-space: normal; }
+    .list-day-item .day-game-item .game-metacritic { margin-left: 0; margin-top: 3px; }
 }

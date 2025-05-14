@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // API Key is handled by Netlify Functions, no client-side key needed.
 
-    const calendarGridView = document.getElementById('calendarGridView'); // Grid container
-    const calendarListView = document.getElementById('calendarListView'); // List container
+    const calendarGridView = document.getElementById('calendarGridView');
+    const calendarListView = document.getElementById('calendarListView');
     const currentMonthYearDisplay = document.getElementById('currentMonthYear');
     const prevMonthBtn = document.getElementById('prevMonthBtn');
     const nextMonthBtn = document.getElementById('nextMonthBtn');
@@ -11,8 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const yearSelect = document.getElementById('yearSelect');
     const goToDateBtn = document.getElementById('goToDateBtn');
     const darkModeToggle = document.getElementById('darkModeToggle');
-    const darkModeIconContainer = document.getElementById('darkModeIconContainer');
-    const toggleContainer = document.getElementById('darkModeToggleContainer'); // Wrapper div
+    // Removed darkModeIconContainer variable as the icon is gone
+    const toggleContainer = document.getElementById('darkModeToggleContainer');
+
     const loadingIndicator = document.getElementById('loadingIndicator');
     const errorMessagesDiv = document.getElementById('errorMessages');
     const gameSearchInput = document.getElementById('gameSearchInput');
@@ -20,14 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchTimeout;
 
     let currentDate = new Date();
-    let gamesCache = {}; // Client-side caching
+    let gamesCache = {};
     let gamesByDay = {};
     let activeSlideshowIntervals = [];
 
     const monthNames = ["January", "February", "March", "April", "May", "June",
                         "July", "August", "September", "October", "November", "December"];
 
-    // --- UTILITY FUNCTIONS --- (Moved some utilities up)
+    // --- UTILITY FUNCTIONS ---
     function getDaysInMonth(year, month) { return new Date(year, month + 1, 0).getDate(); }
     
     function showLoading(isLoading) {
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- SEARCH HANDLER FUNCTIONS (DEFINED BEFORE setupEventListeners) ---
+    // --- SEARCH HANDLER FUNCTIONS ---
     function handleSearchInput() {
         clearTimeout(searchTimeout);
         const query = gameSearchInput.value.trim();
@@ -67,23 +68,22 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
             const query = gameSearchInput.value.trim();
             if(searchSuggestionsDiv) searchSuggestionsDiv.style.display = 'none';
-            if (query) findAndGoToGame(query); // Will use the current input value for a direct search
+            if (query) findAndGoToGame(query);
         }
     }
 
      // --- Helper Function to Create Game Item Element ---
-    // Moved this logic into a reusable function for both grid and list views
     function createGameItemElement(game) {
         const gameItem = document.createElement('a');
-        gameItem.className = 'day-game-item'; // Use the shared base class
+        gameItem.className = 'day-game-item';
         gameItem.href = `https://rawg.io/games/${game.slug || game.name.toLowerCase().replace(/\s+/g, '-')}`;
         gameItem.target = '_blank';
         gameItem.title = `${game.name} - Rating: ${game.rating || 'N/A'}, Metacritic: ${game.metacritic || 'N/A'}`;
 
         const imgEl = document.createElement('img');
-        imgEl.src = game.background_image || 'https://via.placeholder.com/32x20?text=G'; // Default size, CSS overrides for list
+        imgEl.src = game.background_image || 'https://via.placeholder.com/32x20?text=G';
         imgEl.alt = game.name.substring(0,3);
-        imgEl.loading = 'lazy'; // Add lazy loading for game images
+        imgEl.loading = 'lazy';
 
         const nameSpan = document.createElement('span');
         nameSpan.className = 'game-name';
@@ -96,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const metacriticSpan = document.createElement('span');
             metacriticSpan.className = 'game-metacritic';
             metacriticSpan.textContent = game.metacritic;
-            // Add metacritic color styling
             if (game.metacritic >= 75) metacriticSpan.style.backgroundColor = '#6c3';
             else if (game.metacritic >= 50) metacriticSpan.style.backgroundColor = '#fc3';
             else if (game.metacritic > 0) metacriticSpan.style.backgroundColor = '#f00';
@@ -112,10 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Client: init() called");
         setupEventListeners();
         populateMonthYearSelectors();
-        loadDarkModePreference();
+        loadDarkModePreference(); // This applies the initial theme class
         try {
             console.log("Client: Calling initial renderCalendar...");
-            // Use await here to ensure the first render completes before other things might try to access elements
             await renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
             console.log("Client: Initial renderCalendar finished.");
         } catch (error) {
@@ -140,35 +138,26 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCalendar(year, month);
         });
         
-        if (darkModeToggle && toggleContainer) {
-            // Listen for changes on the actual checkbox (e.g., keyboard interaction)
+        // --- Dark Mode Toggle ---
+        if (darkModeToggle) {
+            // Listen for changes on the actual checkbox (triggered by clicks on checkbox or its associated label)
             darkModeToggle.addEventListener('change', () => {
-                // The 'checked' state is already updated by the browser
                 toggleDarkModeLogic(darkModeToggle.checked);
             });
-
-            // Make the entire container clickable (covers the icon area)
-            toggleContainer.addEventListener('click', (event) => {
-                // Only manually toggle if the click was NOT on the input itself or its direct label
-                // The label click should handle it normally via browser behavior, but this adds robustness
-                 if (event.target !== darkModeToggle && event.target !== darkModeIconContainer && !darkModeIconContainer.contains(event.target) && event.target.tagName !== 'I') {
-                    darkModeToggle.checked = !darkModeToggle.checked;
-                    toggleDarkModeLogic(darkModeToggle.checked); 
-                }
-            });
+             // No separate click listener on toggleContainer needed if label covers clickable area
         }
 
+        // --- Search ---
         if(gameSearchInput) gameSearchInput.addEventListener('input', handleSearchInput);
         if(gameSearchInput) gameSearchInput.addEventListener('keydown', handleSearchKeyDown);
         
         document.addEventListener('click', (event) => {
-            // Hide suggestions if clicking outside the search input and suggestions area
-            if (searchSuggestionsDiv && gameSearchInput) { // Check if elements exist
+            if (searchSuggestionsDiv && gameSearchInput) {
                  const isClickInsideSearchArea = gameSearchInput.contains(event.target) || searchSuggestionsDiv.contains(event.target);
                  if (!isClickInsideSearchArea) {
                      searchSuggestionsDiv.style.display = 'none';
                  }
-            } else if (searchSuggestionsDiv && !searchSuggestionsDiv.contains(event.target)) { // Fallback if searchInput not found
+            } else if (searchSuggestionsDiv && !searchSuggestionsDiv.contains(event.target)) {
                  searchSuggestionsDiv.style.display = 'none';
             }
         });
@@ -179,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isDarkMode = localStorage.getItem('darkMode') === 'true';
         if (darkModeToggle) darkModeToggle.checked = isDarkMode;
         
-        applyTheme(isDarkMode);
+        applyTheme(isDarkMode); // Apply the initial theme class
     }
 
     function toggleDarkModeLogic(isDarkMode) { 
@@ -190,19 +179,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyTheme(isDarkMode) {
         document.body.classList.toggle('dark-mode', isDarkMode);
         document.body.classList.toggle('light-mode', !isDarkMode);
-        updateDarkModeIcon(isDarkMode);
+        // No updateDarkModeIcon call needed here anymore
     }
 
-    function updateDarkModeIcon(isDarkMode) {
-        if (darkModeIconContainer) {
-            const iconElement = darkModeIconContainer.querySelector('i');
-            if (iconElement) {
-                iconElement.className = isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
-            } else {
-                 darkModeIconContainer.innerHTML = isDarkMode ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-stars-fill"></i>';
-            }
-        }
-    }
+    // Removed updateDarkModeIcon function entirely
 
     // --- CALENDAR NAVIGATION AND RENDERING ---
     function navigateMonth(direction) {
@@ -216,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function populateMonthYearSelectors() {
-        if(monthSelect && yearSelect) { // Check if elements exist
+        if(monthSelect && yearSelect) {
             monthNames.forEach((name, index) => monthSelect.add(new Option(name, index)));
             const currentYr = new Date().getFullYear();
             for (let i = currentYr - 10; i <= currentYr + 10; i++) yearSelect.add(new Option(i, i));
@@ -333,16 +313,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     listDayItem.className = 'list-day-item';
 
                     // Add Date Header
-                    const listDayHeader = document.createElement('h5'); // Or h6, div etc.
+                    const listDayHeader = document.createElement('h5');
                     listDayHeader.className = 'list-day-header';
                     const dateForHeader = new Date(year, month, day);
-                    listDayHeader.textContent = dateForHeader.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); // Format: e.g., Monday, May 15, 2025
+                    listDayHeader.textContent = dateForHeader.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                     listDayItem.appendChild(listDayHeader);
 
                     // Add Games List for this day
                     const gamesContainer = document.createElement('div');
                     gamesOnThisDay.forEach(game => {
-                        gamesContainer.appendChild(createGameItemElement(game)); // Use helper function
+                        gamesContainer.appendChild(createGameItemElement(game));
                     });
                     listDayItem.appendChild(gamesContainer);
 
@@ -368,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (intervalTime === 0 || images.length <= 1) return;
         const intervalId = setInterval(() => {
-            if (!slideshowDiv.isConnected) { // Stop interval if element is removed from DOM
+            if (!slideshowDiv.isConnected) { 
                 clearInterval(intervalId);
                 return;
             }
@@ -450,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 displaySearchSuggestions(data.results);
             } else {
                  console.error("Client: Unexpected data structure from function (fetchSearchSuggestions):", data);
-                if(searchSuggestionsDiv) searchSuggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Unexpected data.</div>';
+                if(searchSuggestionsDiv) searchSuggestionsDiv.innerHTML = '<div class-list-group-item text-danger">Unexpected data.</div>';
             }
         } catch (error) {
             console.error("Client: Network error calling Netlify function (fetchSearchSuggestions):", error);
