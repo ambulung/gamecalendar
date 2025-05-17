@@ -23,21 +23,22 @@
                 <div id="searchSuggestions" class="list-group position-absolute w-100" style="z-index: 1050; display:none; top: 100%; left: 0;"></div>
             </div>
             <nav class="header-nav">
-                <a href="#" class="header-nav-item" aria-label="Notifications" title="Notifications">
-                    <i class="bi bi-bell"></i>
-                </a>
-                <div class="form-check form-switch header-nav-item ms-2 me-2" title="Toggle Dark Mode" id="darkModeToggleContainer">
-                    <input class="form-check-input" type="checkbox" role="switch" id="darkModeToggle">
-                    <label class="form-check-label visually-hidden" for="darkModeToggle">Dark Mode</label>
-                    <span id="darkModeIconContainer" class="ms-1"><i class="bi bi-moon-stars-fill"></i></span>
+                <!-- Notification bell icon removed -->
+                <!-- Updated Dark Mode Toggle Structure -->
+                <div class="dark-mode-toggle-wrapper">
+                    <span class="dark-mode-label visually-hidden d-sm-inline">DARK</span> <!-- Hide on small, show on sm+ -->
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="darkModeToggle" aria-label="Toggle Dark or Light Mode">
+                        <label class="form-check-label visually-hidden" for="darkModeToggle"></label> <!-- Keep label for accessibility -->
+                    </div>
+                    <span class="light-mode-label visually-hidden d-sm-inline">LIGHT</span> <!-- Hide on small, show on sm+ -->
                 </div>
             </nav>
         </div>
     </header>
 
-    <!-- Month Navigation Header - MOVED OUTSIDE calendar-container for full width -->
-    <div class="month-navigation-header sticky-top-subheader shadow-sm"> <!-- New class for potential second sticky layer -->
-        <div class="container-fluid month-nav-content-container p-3"> <!-- Inner container for content alignment -->
+    <div class="month-navigation-header sticky-top-subheader shadow-sm">
+        <div class="container-fluid month-nav-content-container p-3">
             <div class="row align-items-center gy-2">
                  <div class="col-12 col-md-auto me-md-auto">
                     <button id="prevMonthBtn" class="btn btn-outline-primary"><i class="bi bi-chevron-left"></i> Prev</button>
@@ -56,8 +57,7 @@
         </div>
     </div>
 
-    <!-- Main content area -->
-    <div class="container-fluid calendar-container"> <!-- Removed mb-3 from month-nav, will be on calendar-container if needed -->
+    <div class="container-fluid calendar-container">
         <div id="currentMonthYear" class="text-center h3 my-3"></div>
         <div id="loadingIndicator" class="text-center my-5" style="display: none;">
             <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
@@ -65,7 +65,7 @@
         </div>
         <div id="errorMessages" class="alert alert-danger mx-3" style="display: none;" role="alert"></div>
 
-        <div class="calendar-grid mb-4">
+        <div id="calendarGridView" class="calendar-grid mb-4 d-none d-md-grid">
             <div class="day-name">Sun</div>
             <div class="day-name">Mon</div>
             <div class="day-name">Tue</div>
@@ -74,6 +74,8 @@
             <div class="day-name">Fri</div>
             <div class="day-name">Sat</div>
         </div>
+
+        <div id="calendarListView" class="calendar-list mb-4 d-md-none"></div>
 
         <footer class="text-center p-3 mt-4 border-top">
             <small>Game data provided by <a href="https://rawg.io/" target="_blank">RAWG API</a></small>

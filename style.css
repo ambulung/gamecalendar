@@ -8,7 +8,7 @@
     --palette-darkest-rgb: 43, 48, 58;
     --palette-accent-rgb: 0, 169, 183;
 
-    /* Site Header specific vars (Dark Mode is default for this header style) */
+    /* Site Header specific vars */
     --site-header-bg: #151515;
     --site-header-text: #e0e0e0;
     --site-header-search-bg: #2d2d2d;
@@ -16,7 +16,7 @@
     --site-header-search-icon: #777777;
     --site-header-search-shortcut-bg: #3a3a3a;
     --site-header-search-shortcut-text: #aaa;
-    --site-header-nav-item-hover-bg: #2a2a2a;
+    --site-header-nav-item-hover-bg: #2a2a2a; /* Hover for items like bell icon */
 
     /* Light Mode Theme */
     --calendar-bg: var(--palette-light);
@@ -26,7 +26,7 @@
     --sub-header-bg: var(--palette-white);
     --sub-header-text: var(--palette-darkest);
     --sub-header-border: #e0e0e0;
-    --day-game-item-text: var(--palette-darkest);
+    --day-game-item-text: var(--palette-darkest); /* Text color for game items */
     --scrollbar-thumb: #b0bec5;
     --scrollbar-track: transparent;
     --btn-primary-bg: var(--palette-accent);
@@ -40,7 +40,12 @@
     --day-number-text-light: var(--palette-darkest);
     --day-number-text-shadow-light: none;
     --day-game-item-text-shadow-light: none;
-    --dark-mode-icon-color: var(--palette-medium-dark);
+
+    /* Toggle specific colors */
+    --toggle-track-dark: var(--palette-medium-dark); /* Track color when toggle is OFF (Dark mode) */
+    --toggle-track-light: var(--palette-accent); /* Track color when toggle is ON (Light mode) */
+    --toggle-knob-color: var(--palette-white);
+    --toggle-label-color: var(--site-header-text); /* Label color in header */
 }
 
 body.dark-mode {
@@ -66,13 +71,18 @@ body.dark-mode {
     --day-number-text-dark: var(--palette-light);
     --day-number-text-shadow-dark: none;
     --day-game-item-text-shadow-dark: none;
-    --dark-mode-icon-color: var(--palette-accent);
+
+    /* Toggle specific colors */
+    --toggle-track-dark: var(--palette-medium-dark);
+    --toggle-track-light: var(--palette-accent);
+    --toggle-knob-color: var(--palette-white);
+    --toggle-label-color: var(--site-header-text); /* Label color in header */
 }
 
 html, body {
     margin: 0;
     padding: 0;
-    height: 100%; /* Ensure body can be a reference for full height if needed */
+    height: 100%;
 }
 
 body {
@@ -80,17 +90,12 @@ body {
     color: var(--calendar-text);
     transition: background-color 0.3s, color 0.3s;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    /* No body padding-top needed if headers are part of normal flow or sticky */
 }
 
 /* Site Header Styles */
 .site-header {
-    background-color: var(--site-header-bg);
-    padding: 0.5rem 0;
-    height: 60px;
+    background-color: var(--site-header-bg); padding: 0.5rem 0; height: 60px;
     border-bottom: 1px solid #2a2a2a;
-    /* .sticky-top from Bootstrap handles position: sticky, top: 0, z-index: 1020 */
-    /* We might need to increase z-index if other sticky elements conflict */
 }
 .header-container {
     display: flex; align-items: center; justify-content: space-between;
@@ -141,40 +146,96 @@ body {
 #searchSuggestions .list-group-item:hover { background-color: var(--site-header-nav-item-hover-bg); }
 #searchSuggestions .list-group-item img { border-radius: 3px; }
 .header-nav { display: flex; align-items: center; }
-.header-nav-item {
+.header-nav-item { /* General style for items like bell icon */
     color: var(--site-header-text); font-size: 1.2rem;
     padding: 0.5rem 0.6rem; border-radius: 50%;
     text-decoration: none; display: flex; align-items: center;
     transition: background-color 0.2s, color 0.2s;
 }
 .header-nav-item:hover {
-    background-color: var(--site-header-nav-item-hover-bg); color: var(--palette-accent);
+     background-color: var(--site-header-nav-item-hover-bg);
+     color: var(--palette-accent);
 }
-.header-nav-item.form-check {
-    padding-left: 0.5rem; padding-right: 0.5rem;
+
+/* --- Dark Mode Toggle Styles --- */
+.dark-mode-toggle-wrapper { /* Container holding labels and switch */
+    display: flex;
+    align-items: center;
+    color: var(--toggle-label-color);
+    font-size: 0.85rem;
+    margin-left: 1rem;
+}
+
+.dark-mode-label, .light-mode-label {
+    padding: 0 0.5rem;
+    white-space: nowrap;
+    user-select: none; /* Prevent text selection */
+}
+
+.dark-mode-label { text-align: right; }
+.light-mode-label { text-align: left; }
+
+
+/* Override Bootstrap form-switch */
+.form-check-switch { /* The div with Bootstrap's form-check form-switch classes */
+    padding-left: 0 !important;
+    margin: 0 0.2rem; /* Space between labels and switch */
+    display: flex;
+    align-items: center;
+    /* min-width needed if labels are hidden on small screens */
+    min-width: 40px; /* Should be equal to the input width */
+    height: 20px; /* Should be equal to the input height */
+}
+
+.form-check-switch .form-check-input {
+    width: 40px;
+    height: 20px;
+    margin: 0 !important;
+    float: none !important;
+    background-image: none !important; /* Remove default gradient/icon */
+    background-color: var(--toggle-track-dark); /* Track color (Dark mode ON / Light mode OFF) */
+    border-color: transparent; /* No visible border */
+    border-radius: 50px; /* Pill shape */
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out; /* Added transform transition */
+    position: relative;
     cursor: pointer;
+    /* These hide the default checkbox visuals */
+    /* If using .visually-hidden-focusable in HTML, these might be redundant */
+    /* appearance: none; */
+    /* -webkit-appearance: none; */
 }
-#darkModeIconContainer i {
-    font-size: 1.1rem;
-    color: var(--dark-mode-icon-color);
-    transition: color 0.2s;
-    vertical-align: middle;
+
+/* Style the knob (the circle part) using ::after */
+.form-check-switch .form-check-input::after {
+    content: "";
+    display: block;
+    width: 16px; /* Size of the knob */
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--toggle-knob-color); /* White knob color */
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    position: absolute;
+    top: 2px; /* Center vertically */
+    left: 2px; /* Initial position (left) */
 }
-.header-nav-item.form-check:hover #darkModeIconContainer i {
-    color: var(--palette-accent);
+
+/* Checked state (Light mode is ON / Dark mode OFF) */
+.form-check-switch .form-check-input:checked {
+    background-color: var(--toggle-track-light); /* Track color when checked */
 }
-.form-check-input { /* For main header toggle */
-    background-color: var(--palette-medium-dark);
-    border-color: var(--palette-medium-dark);
-    cursor: pointer;
+
+/* Position the knob when checked */
+.form-check-switch .form-check-input:checked::after {
+    transform: translateX(20px); /* Move knob to the right */
 }
-.form-check-input:checked {
-    background-color: var(--palette-accent);
-    border-color: var(--palette-accent);
-}
-.form-check-input:focus {
+
+/* Focus state */
+.form-check-switch .form-check-input:focus {
+    border-color: transparent;
+    outline: 0;
     box-shadow: 0 0 0 0.25rem rgba(var(--palette-accent-rgb), 0.25);
 }
+
 
 /* Month Navigation Sub-Header (Full Width) */
 .month-navigation-header {
@@ -182,27 +243,26 @@ body {
     color: var(--sub-header-text);
     border-bottom: 1px solid var(--sub-header-border);
     transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-    padding: 0; /* Outer div is full width, no padding */
+    padding: 0;
 }
-.sticky-top-subheader { /* Making the sub-header sticky below the main header */
+.sticky-top-subheader {
     position: sticky;
-    top: 60px; /* Height of the .site-header */
-    z-index: 1020; /* Below .site-header's default sticky-top z-index (1020) if site-header is also sticky but higher. Bootstrap .sticky-top is 1020 */
-                  /* If .site-header uses default Bootstrap .sticky-top, this needs to be lower or .site-header needs to be higher */
+    top: 60px;
+    z-index: 1020;
 }
 .site-header.sticky-top {
-    z-index: 1021; /* Ensure main header is on top of sub-header if both are sticky */
+    z-index: 1021;
 }
-.month-nav-content-container { /* Inner container to center the content */
-    max-width: 1600px; /* Or your preferred content width, e.g., same as .header-container */
+.month-nav-content-container {
+    max-width: 1600px;
     margin: 0 auto;
     /* Bootstrap .p-3 class in HTML handles padding */
 }
 /* Controls within month-navigation-header */
 .month-navigation-header .form-control,
 .month-navigation-header .form-select {
-    background-color: var(--form-control-bg); /* Use general form control bg based on theme */
-    color: var(--calendar-text); /* Use main calendar text color for forms */
+    background-color: var(--form-control-bg);
+    color: var(--calendar-text);
     border-color: var(--calendar-border);
 }
 .month-navigation-header .btn-primary {
@@ -242,19 +302,19 @@ body.dark-mode .month-navigation-header .btn-outline-secondary:hover {
     color: var(--sub-header-text);
 }
 
-
-/* Main Calendar Container - now directly after headers */
+/* Main Calendar Container */
 .calendar-container {
     max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
-    padding-top: 1rem; /* Space below the (potentially sticky) sub-header */
+    padding-top: 1rem;
     padding-bottom: 1rem;
 }
 
-/* Calendar Grid and Day Cell styles (These should remain largely the same) */
+/* Calendar Grid Styles (Visible >= md breakpoint) */
 .calendar-grid {
-    display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
     border: 1px solid var(--calendar-border); padding: 5px;
     border-radius: 0.25rem;
 }
@@ -314,33 +374,72 @@ body.dark-mode .day-number {
 body:not(.dark-mode) .calendar-day.today .day-number {
     color: var(--palette-white);
 }
-.day-games-list {
+.day-games-list { /* For grid view scroll */
     flex-grow: 1; overflow-y: auto; overflow-x: hidden; min-height: 0;
 }
 .day-games-list::-webkit-scrollbar { width: 5px; }
 .day-games-list::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 .day-games-list::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb); border-radius: 10px; }
 .day-games-list { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
+
+
+/* Calendar List View Styles (Visible < md breakpoint) */
+.calendar-list {
+    /* display: block; -- Applied via .d-md-none */
+}
+.list-day-item {
+    background-color: var(--sub-header-bg);
+    border: 1px solid var(--calendar-border);
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    color: var(--calendar-text);
+}
+body.dark-mode .list-day-item {
+     background-color: var(--sub-header-bg);
+     border-color: var(--sub-header-border);
+}
+.list-day-header {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--calendar-border);
+    color: var(--calendar-text);
+}
+body.dark-mode .list-day-header {
+    border-bottom-color: var(--sub-header-border);
+    color: var(--calendar-text);
+}
+.list-day-item .day-game-item { /* Overrides for list view items */
+    padding: 5px 2px;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+}
+.list-day-item .day-game-item:last-child { margin-bottom: 0; }
+.list-day-item .day-game-item img { width: 48px; height: 30px; }
+.list-day-item .day-game-item .game-name {
+    white-space: normal; overflow: visible; text-overflow: clip;
+}
+
+
+/* Day Game Item shared styles (used by both grid and list) */
 .day-game-item {
     display: flex; align-items: center; padding: 3px; margin-bottom: 3px;
-    border-radius: 3px;
-    background-color: transparent;
-    font-size: 0.7rem;
-    color: var(--day-game-item-text);
-    text-shadow: var(--day-game-item-text-shadow-dark);
-    cursor: pointer; text-decoration: none;
-    transition: background-color 0.15s ease-in-out;
+    border-radius: 3px; background-color: transparent;
+    color: var(--day-game-item-text); text-shadow: var(--day-game-item-text-shadow-dark);
+    cursor: pointer; text-decoration: none; transition: background-color 0.15s ease-in-out;
 }
-body:not(.dark-mode) .day-game-item {
-    text-shadow: var(--day-game-item-text-shadow-light);
+body:not(.dark-mode) .day-game-item { text-shadow: var(--day-game-item-text-shadow-light); }
+.day-game-item:last-child {
+    /* Specificity might be needed if list override is stronger */
+    /* margin-bottom: 1px; */
 }
-.day-game-item:last-child { margin-bottom: 1px; }
 .day-game-item:hover { background-color: rgba(0,0,0,0.08); }
 body.dark-mode .day-game-item:hover { background-color: rgba(255,255,255,0.05); }
 .day-game-item img {
     width: 32px; height: 20px; object-fit: cover; margin-right: 5px;
-    border-radius: 2px; flex-shrink: 0;
-    background-color: var(--palette-medium-dark);
+    border-radius: 2px; flex-shrink: 0; background-color: var(--palette-medium-dark);
 }
 body:not(.dark-mode) .day-game-item img { background-color: #e0e0e0; }
 .day-game-item .game-name {
@@ -351,6 +450,7 @@ body:not(.dark-mode) .day-game-item img { background-color: #e0e0e0; }
     font-size: 0.65rem; font-weight: bold; padding: 1px 3px;
     border-radius: 2px; margin-left: 4px; color: white; flex-shrink: 0; text-shadow: none;
 }
+
 
 /* Alert Messages, Loading, Footer */
 .alert-danger { background-color: #f8d7da; border-color: #f5c2c7; color: #842029; }
@@ -369,9 +469,10 @@ footer a:hover { text-decoration: underline; }
     .header-logo { font-size: 1.3rem; margin-right: 1rem; }
     .header-search-container { max-width: 500px; }
 }
-@media (max-width: 768px) {
+@media (max-width: 768px) { /* md breakpoint */
+     /* Header responsive adjustments */
     .site-header { height: 56px; }
-    .sticky-top-subheader { top: 56px; } /* Match new main header height */
+    .sticky-top-subheader { top: 56px; }
 
     .header-logo { display: none; }
     .header-search-container { margin-left: 0.5rem; margin-right: 0.5rem; max-width: none; }
@@ -379,23 +480,27 @@ footer a:hover { text-decoration: underline; }
     .search-shortcut { display: none; }
     .header-nav-item { font-size: 1.1rem; padding: 0.4rem 0.5rem;}
 
+    /* Calendar responsive adjustments */
     .month-nav-content-container .row > div {
         width: 100%; text-align: center; margin-bottom: 0.5rem;
     }
     .month-nav-content-container .row > div:last-child { margin-bottom: 0; }
     .month-nav-content-container .d-flex.justify-content-md-end { justify-content: center !important; }
 
-    .day-name { font-size: 0.75rem; padding: 0.3rem 0.1rem; }
-    .day-game-item { font-size: 0.65rem; }
-    .day-game-item img { width: 28px; height: 18px; }
-    .day-number { font-size: 0.7rem; }
+    /* List view specific tweaks */
+    .list-day-item { padding: 0.6rem 0.8rem; }
+    .list-day-header { font-size: 1rem; }
+    .list-day-item .day-game-item { font-size: 0.75rem; }
+    .list-day-item .day-game-item img { width: 40px; height: 25px; }
+
+    /* Dark mode labels hidden on small screens */
+    .dark-mode-label, .light-mode-label { display: none !important; }
 }
-@media (max-width: 576px) {
+@media (max-width: 576px) { /* sm breakpoint */
     #currentMonthYear { font-size: 1.5rem; }
     .month-nav-content-container .btn, .month-nav-content-container .form-select { font-size: 0.8rem; }
-    .day-game-item { flex-direction: column; align-items: flex-start; }
-    .day-game-item img { margin-bottom: 2px; width: 100%; height: auto; aspect-ratio: 16/10; }
-    .day-game-item .game-name { white-space: normal; }
-    .day-game-item .game-metacritic { margin-left: 0; margin-top: 2px; }
-    .day-number { font-size: 0.65rem; padding: 1px 2px;}
+    .list-day-item .day-game-item { flex-direction: column; align-items: flex-start; }
+    .list-day-item .day-game-item img { margin-bottom: 4px; width: 100%; height: auto; aspect-ratio: 16/10; }
+    .list-day-item .day-game-item .game-name { white-space: normal; }
+    .list-day-item .day-game-item .game-metacritic { margin-left: 0; margin-top: 3px; }
 }
