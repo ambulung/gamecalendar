@@ -466,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error("Client: Error fetching game for navigation via function:", error);
-                displayError(`Could not find details for "${gameName}".`);
+                displayError(`Could find details for "${gameName}".`);
                 showLoading(false); return;
             }
         }
