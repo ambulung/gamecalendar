@@ -462,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.results && data.results.length > 0) {
                     gameToNavigate = data.results[0];
                 } else {
-                    throw new Error('Game not found in precise search via function.');
+                    throw new Error('Game  found in precise search via function.');
                 }
             } catch (error) {
                 console.error("Client: Error fetching game for navigation via function:", error);
