@@ -30,6 +30,3 @@ To run the Game Release Calendar locally, follow these steps:
 - Click on the "Today" button to quickly return to the current month.
 - Select a month and year from the dropdowns and click "Go" to jump to a specific date.
 - Use the search bar to find specific games.
-
-## Contributing
-Contributions are welcome! If you have suggestions for improvements or new features, please open an issue or submit a pull request.
