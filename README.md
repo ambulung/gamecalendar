@@ -17,7 +17,7 @@ To run the Game Release Calendar locally, follow these steps:
 
 1. Clone the repository:
    ```
-   git clone <repository-url>
+   git clone https://github.com/ambulung/gamecalendar
    ```
 2. Navigate to the project directory:
    ```
