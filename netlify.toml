@@ -1,6 +1,2 @@
-[build]
-    functions = "netlify/functions" # Tells Netlify where your functions are located
-    publish = "your_publish_directory" # e.g., "dist" or "public" - where your built frontend code goes
-
 [functions]
-    node_bundler = "esbuild" # Optional, but recommended for faster builds
+  directory = "netlify/functions"
