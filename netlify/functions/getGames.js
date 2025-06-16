@@ -1,66 +1,84 @@
-// Using node-fetch for making HTTP requests in Node.js environment
-// You might need to add "node-fetch" to your package.json if you were using a full Node project,
-// but for simple Netlify functions, this might work out of the box or Netlify handles it.
-// If not, consider using the built-in `https` module or a lightweight alternative.
-// For simplicity, let's try with a dynamic import if node-fetch is not automatically available.
-// Or, even better, use the global `fetch` that's available in newer Node versions and Netlify Functions environment.
+// .netlify/functions/getGames.js
+
+const axios = require('axios'); // Make sure you have axios installed (npm install axios)
 
 exports.handler = async function(event, context) {
-    const apiKey = process.env.RAWG_API_KEY; // Access the environment variable
+    // Extract query parameters from the client-side request
+    const { searchQuery, year, month, pageSize, ordering, searchPrecise, searchExact } = event.queryStringParameters;
+    
+    // Your RAWG API Key should be set as an environment variable in Netlify
+    // e.g., RAWG_API_KEY = YOUR_ACTUAL_RAWG_API_KEY
+    const RAWG_API_KEY = process.env.RAWG_API_KEY;
 
-    // Get query parameters passed from the client (e.g., date, search query)
-    const { date, month, year, searchQuery, gameSlug, pageSize, ordering, searchPrecise, searchExact } = event.queryStringParameters;
-
-    let rawgApiUrl;
-
-    // Construct the RAWG API URL based on the parameters received
-    // This logic needs to mirror what your client-side was doing
-    if (month && year) { // Fetching for a whole month
-        const M = parseInt(month);
-        const Y = parseInt(year);
-        const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
-        const startDate = `${Y}-${String(M + 1).padStart(2, '0')}-01`;
-        const endDate = `${Y}-${String(M + 1).padStart(2, '0')}-${String(getDaysInMonth(Y, M)).padStart(2, '0')}`;
-        rawgApiUrl = `https://api.rawg.io/api/games?key=${apiKey}&dates=${startDate},${endDate}&ordering=${ordering || '-metacritic,-added'}&page_size=${pageSize || 40}`;
-    } else if (searchQuery) { // Fetching search suggestions or specific game
-        let searchParams = `search=${encodeURIComponent(searchQuery)}&page_size=${pageSize || 6}`;
-        if (searchPrecise) searchParams += `&search_precise=${searchPrecise}`;
-        if (searchExact) searchParams += `&search_exact=${searchExact}`;
-        rawgApiUrl = `https://api.rawg.io/api/games?key=${apiKey}&${searchParams}`;
-    } else {
-        // Handle other cases or return an error if parameters are missing
+    if (!RAWG_API_KEY) {
+        console.error("RAWG_API_KEY environment variable not set in Netlify.");
         return {
-            statusCode: 400,
-            body: JSON.stringify({ error: "Missing required query parameters for API call." }),
+            statusCode: 500,
+            body: JSON.stringify({ error: 'Server configuration error: API Key missing.' }),
         };
     }
 
-    console.log("Netlify Function: Fetching URL:", rawgApiUrl.replace(apiKey, "YOUR_API_KEY_HIDDEN")); // Log URL without key
+    let url = 'https://api.rawg.io/api/games';
+    const params = { key: RAWG_API_KEY };
+
+    // Build RAWG API parameters based on the client's request
+    if (searchQuery) {
+        params.search = searchQuery;
+        if (searchPrecise === 'true') params.search_precise = true;
+        if (searchExact === 'true') params.search_exact = true;
+    } else if (year && month) {
+        // RAWG API expects month to be 1-indexed (Jan=1, Feb=2), but JS month is 0-indexed (Jan=0, Feb=1)
+        const parsedMonth = parseInt(month); // Convert month string to integer
+        const parsedYear = parseInt(year);
+
+        const startDate = `${parsedYear}-${parsedMonth + 1}-01`;
+        const endDate = `${parsedYear}-${parsedMonth + 1}-${new Date(parsedYear, parsedMonth + 1, 0).getDate()}`;
+        params.dates = `${startDate},${endDate}`;
+        params.ordering = ordering || '-released'; // Default ordering if not specified
+    }
+
+    params.page_size = pageSize || 40; // Default page size for the API call
+
+    // --- NSFW Filtering Criteria ---
+    // These are based on common RAWG data fields (ESRB ratings and tags)
+    const NSFW_ESRB_RATINGS = ['Adults Only']; // Games with this ESRB rating will be excluded
+    const NSFW_KEYWORDS = ['porn', 'hentai', 'adult', 'erotic', 'sexual', 'nudity']; // Games with tags containing these keywords will be excluded
 
     try {
-        const response = await fetch(rawgApiUrl);
-        const data = await response.json();
+        const response = await axios.get(url, { params });
+        let games = response.data.results; // This is the array of games from RAWG
 
-        if (!response.ok) {
-            console.error("RAWG API Error:", data);
-            return {
-                statusCode: response.status,
-                body: JSON.stringify({ error: `RAWG API Error: ${response.statusText}`, details: data }),
-            };
-        }
+        // --- Apply NSFW Filtering ---
+        const filteredGames = games.filter(game => {
+            // 1. Check ESRB rating
+            if (game.esrb_rating && NSFW_ESRB_RATINGS.includes(game.esrb_rating.name)) {
+                // console.log(`[NSFW Filter] Excluding (ESRB): ${game.name} - ${game.esrb_rating.name}`); // For debugging
+                return false; // Exclude this game (it's NSFW)
+            }
 
+            // 2. Check game tags for NSFW keywords
+            if (game.tags && game.tags.some(tag =>
+                NSFW_KEYWORDS.some(keyword => tag.name.toLowerCase().includes(keyword))
+            )) {
+                // console.log(`[NSFW Filter] Excluding (Tag): ${game.name}`); // For debugging
+                return false; // Exclude this game (it has an NSFW tag)
+            }
+
+            // If the game passes both checks, it's not considered NSFW, so include it
+            return true;
+        });
+
+        // Return the filtered list of games to the client
         return {
             statusCode: 200,
-            body: JSON.stringify(data), // Forward the RAWG response to the client
-            headers: {
-                'Content-Type': 'application/json',
-            }
+            body: JSON.stringify({ results: filteredGames, count: filteredGames.length }),
         };
+
     } catch (error) {
-        console.error("Error in Netlify function:", error);
+        console.error('Error calling RAWG API from Netlify function:', error.response ? error.response.data : error.message);
         return {
-            statusCode: 500,
-            body: JSON.stringify({ error: "Failed to fetch data from RAWG API via function.", details: error.message }),
+            statusCode: error.response ? error.response.status : 500,
+            body: JSON.stringify({ error: 'Failed to fetch games from RAWG API', details: error.response ? error.response.data : error.message }),
         };
     }
 };
