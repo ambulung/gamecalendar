@@ -12,19 +12,6 @@ You can watch the website here: https://gamecalendar.netlify.app/
 - **style.css**: Contains custom styles for the application, defining the visual appearance of HTML elements.
 - **script.js**: Implements the functionality of the application, handling user interactions, fetching game data, and updating the calendar display.
 
-## Installation
-To run the Game Release Calendar locally, follow these steps:
-
-1. Clone the repository:
-   ```
-   git clone https://github.com/ambulung/gamecalendar
-   ```
-2. Navigate to the project directory:
-   ```
-   cd gamecalendar
-   ```
-3. Open `index.html` in your web browser.
-
 ## Usage
 - Use the navigation buttons to move between months.
 - Click on the "Today" button to quickly return to the current month.
