@@ -1,10 +1,3 @@
-// Using node-fetch for making HTTP requests in Node.js environment
-// You might need to add "node-fetch" to your package.json if you were using a full Node project,
-// but for simple Netlify functions, this might work out of the box or Netlify handles it.
-// If not, consider using the built-in `https` module or a lightweight alternative.
-// For simplicity, let's try with a dynamic import if node-fetch is not automatically available.
-// Or, even better, use the global `fetch` that's available in newer Node versions and Netlify Functions environment.
-
 exports.handler = async function(event, context) {
     const apiKey = process.env.RAWG_API_KEY; // Access the environment variable
 
